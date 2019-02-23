@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "test": "elm-test"
+  },
+  "dependencies": {
+    "elm": "0.19.0-bugfix6",
+    "elm-test": "0.19.0-rev5"
+  },
+  "devDependencies": {
+    "elm-format": "0.8.1"
+  }
+}
