@@ -31,51 +31,13 @@ import Parser
 import Set
 
 
-type Dot
-    = Dot EdgeType (List Stmt)
-
-
-type EdgeType
-    = Graph
-    | Digraph
-
-
-type
-    Stmt
-    --TODO: (List (EdgeType, NodeId))
-    = EdgeStmt NodeId ( EdgeType, NodeId )
-
-
-type NodeId
-    = NodeId ID (Maybe Port)
-
-
-type ID
-    = ID String
-
-
-type
-    Port
-    -- TODO: parse these
-    = Port ID (Maybe CompassPt)
-
-
-type CompassPt
-    = N
-    | NE
-    | E
-    | SE
-    | S
-    | SW
-    | W
-    | NW
-    | C
-    | UND
-
-
 parse : String -> Result (List Parser.DeadEnd) Dot
 parse =
     Parser.run dot
+
+
+type Dot
+    = Dot EdgeType (List Stmt)
 
 
 dot : Parser Dot
@@ -84,6 +46,37 @@ dot =
         |= edgeType
         |. spaces
         |= block
+
+
+type EdgeType
+    = Graph
+    | Digraph
+
+
+edgeType : Parser EdgeType
+edgeType =
+    oneOf
+        [ map (\_ -> Graph) (symbol "graph")
+        , map (\_ -> Digraph) (symbol "digraph")
+        ]
+
+
+type
+    Stmt
+    --TODO: (List (EdgeType, NodeId))
+    = EdgeStmt NodeId ( EdgeType, NodeId )
+
+
+block : Parser (List Stmt)
+block =
+    sequence
+        { start = "{"
+        , separator = ";"
+        , end = "}"
+        , spaces = spaces
+        , item = statement
+        , trailing = Optional
+        }
 
 
 statement : Parser Stmt
@@ -110,9 +103,17 @@ edgeOp =
         ]
 
 
+type NodeId
+    = NodeId ID (Maybe Port)
+
+
 nodeId : Parser NodeId
 nodeId =
     map (\i -> NodeId i Nothing) id
+
+
+type ID
+    = ID String
 
 
 id : Parser ID
@@ -126,21 +127,20 @@ id =
             }
 
 
-block : Parser (List Stmt)
-block =
-    sequence
-        { start = "{"
-        , separator = ";"
-        , end = "}"
-        , spaces = spaces
-        , item = statement
-        , trailing = Mandatory
-        }
+type
+    Port
+    -- TODO: parse these
+    = Port ID (Maybe CompassPt)
 
 
-edgeType : Parser EdgeType
-edgeType =
-    oneOf
-        [ map (\_ -> Graph) (symbol "graph")
-        , map (\_ -> Digraph) (symbol "digraph")
-        ]
+type CompassPt
+    = N
+    | NE
+    | E
+    | SE
+    | S
+    | SW
+    | W
+    | NW
+    | C
+    | UND
