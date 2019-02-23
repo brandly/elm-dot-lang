@@ -1,4 +1,4 @@
-module DotLang exposing (Directed(..), Dot(..), block, parse, statement)
+module DotLang exposing (Directed(..), Dot(..), NodeId(..), Stmt(..), block, parse, statement)
 
 import Parser
     exposing
@@ -29,6 +29,16 @@ type Directed
     | Digraph
 
 
+type
+    Stmt
+    -- TODO: this second one is really `List NodeId`
+    = EdgeStmt NodeId NodeId
+
+
+type NodeId
+    = NodeId String
+
+
 parse : String -> Result (List Parser.DeadEnd) Dot
 parse =
     Parser.run dot
@@ -42,20 +52,29 @@ dot =
         |= block
 
 
-type alias Stmt =
-    String
-
-
 statement : Parser Stmt
 statement =
-    let
-        legal c =
-            c /= ';' && c /= '}'
-    in
-    getChompedString <|
-        succeed identity
-            |. chompIf legal
-            |. chompWhile legal
+    succeed (\a b -> EdgeStmt a b)
+        |= id
+        |. spaces
+        |. edgeOp
+        |. spaces
+        |= id
+
+
+edgeOp : Parser ()
+edgeOp =
+    symbol "--"
+
+
+id : Parser NodeId
+id =
+    map NodeId
+        (getChompedString <|
+            succeed identity
+                -- TODO: this should be a whitelist
+                |. chompWhile (\c -> c /= ';' && c /= '}' && c /= '-' && c /= '\n' && c /= ' ')
+        )
 
 
 block : Parser (List Stmt)

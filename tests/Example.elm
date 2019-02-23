@@ -1,6 +1,6 @@
 module Example exposing (suite)
 
-import DotLang exposing (Directed(..), Dot(..), block, parse, statement)
+import DotLang exposing (Directed(..), Dot(..), NodeId(..), Stmt(..), block, parse, statement)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Parser
@@ -20,18 +20,18 @@ suite =
                 Expect.equal (Parser.run block "{}") (Ok [])
         , test "statement" <|
             \_ ->
-                Expect.equal (Parser.run statement "sup;hello;dont care") (Ok "sup")
+                Expect.equal (Parser.run statement "sup -- dude;dont -- care") (Ok (EdgeStmt (NodeId "sup") (NodeId "dude")))
         , test "parsing simple graph" <|
             \_ ->
                 Expect.equal (parse simpleGraph)
                     (Ok
                         (Dot Graph
-                            [ "a -- b"
-                            , "b -- c"
-                            , "a -- c"
-                            , "d -- c"
-                            , "e -- c"
-                            , "e -- a"
+                            [ EdgeStmt (NodeId "a") (NodeId "b")
+                            , EdgeStmt (NodeId "b") (NodeId "c")
+                            , EdgeStmt (NodeId "a") (NodeId "c")
+                            , EdgeStmt (NodeId "d") (NodeId "c")
+                            , EdgeStmt (NodeId "e") (NodeId "c")
+                            , EdgeStmt (NodeId "e") (NodeId "a")
                             ]
                         )
                     )
