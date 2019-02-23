@@ -1,6 +1,6 @@
 module Example exposing (suite)
 
-import DotLang exposing (Directed(..), Dot(..), NodeId(..), Stmt(..), block, parse, statement)
+import DotLang exposing (Dot(..), EdgeType(..), NodeId(..), Stmt(..), block, parse, statement)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Parser
@@ -20,8 +20,8 @@ simpleDigraph =
 suite : Test
 suite =
     let
-        edge a b =
-            EdgeStmt (NodeId a) (NodeId b)
+        edge a uh b =
+            EdgeStmt (NodeId a) ( uh, NodeId b )
     in
     describe "Dot Lang Parser"
         [ test "block" <|
@@ -29,18 +29,18 @@ suite =
                 Expect.equal (Parser.run block "{}") (Ok [])
         , test "statement" <|
             \_ ->
-                Expect.equal (Parser.run statement "sup -- dude;dont -- care") (Ok (EdgeStmt (NodeId "sup") (NodeId "dude")))
+                Expect.equal (Parser.run statement "sup -- dude;dont -- care") (Ok (edge "sup" Graph "dude"))
         , test "parsing simple graph" <|
             \_ ->
                 Expect.equal (parse simpleGraph)
                     (Ok
                         (Dot Graph
-                            [ edge "a" "b"
-                            , edge "b" "c"
-                            , edge "a" "c"
-                            , edge "d" "c"
-                            , edge "e" "c"
-                            , edge "e" "a"
+                            [ edge "a" Graph "b"
+                            , edge "b" Graph "c"
+                            , edge "a" Graph "c"
+                            , edge "d" Graph "c"
+                            , edge "e" Graph "c"
+                            , edge "e" Graph "a"
                             ]
                         )
                     )
@@ -49,10 +49,10 @@ suite =
                 Expect.equal (parse simpleDigraph)
                     (Ok
                         (Dot Digraph
-                            [ edge "a" "b"
-                            , edge "b" "c"
-                            , edge "c" "d"
-                            , edge "d" "a"
+                            [ edge "a" Digraph "b"
+                            , edge "b" Digraph "c"
+                            , edge "c" Digraph "d"
+                            , edge "d" Digraph "a"
                             ]
                         )
                     )

@@ -1,4 +1,4 @@
-module DotLang exposing (Directed(..), Dot(..), NodeId(..), Stmt(..), block, parse, statement)
+module DotLang exposing (Dot(..), EdgeType(..), NodeId(..), Stmt(..), block, parse, statement)
 
 import Parser
     exposing
@@ -23,18 +23,18 @@ import Set
 
 
 type Dot
-    = Dot Directed (List Stmt)
+    = Dot EdgeType (List Stmt)
 
 
-type Directed
+type EdgeType
     = Graph
     | Digraph
 
 
 type
     Stmt
-    -- TODO: this second one is really `List NodeId`
-    = EdgeStmt NodeId NodeId
+    --TODO: (List (EdgeType, NodeId))
+    = EdgeStmt NodeId ( EdgeType, NodeId )
 
 
 type NodeId
@@ -49,26 +49,26 @@ parse =
 dot : Parser Dot
 dot =
     succeed Dot
-        |= directed
+        |= edgeType
         |. spaces
         |= block
 
 
 statement : Parser Stmt
 statement =
-    succeed (\a b -> EdgeStmt a b)
+    succeed (\a edge b -> EdgeStmt a ( edge, b ))
         |= nodeId
         |. spaces
-        |. edgeOp
+        |= edgeOp
         |. spaces
         |= nodeId
 
 
-edgeOp : Parser ()
+edgeOp : Parser EdgeType
 edgeOp =
     oneOf
-        [ symbol "--"
-        , symbol "->"
+        [ map (\_ -> Graph) (symbol "--")
+        , map (\_ -> Digraph) (symbol "->")
         ]
 
 
@@ -95,8 +95,8 @@ block =
         }
 
 
-directed : Parser Directed
-directed =
+edgeType : Parser EdgeType
+edgeType =
     oneOf
         [ map (\_ -> Graph) (symbol "graph")
         , map (\_ -> Digraph) (symbol "digraph")
