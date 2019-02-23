@@ -54,7 +54,8 @@ type ID
     = ID String
 
 
-type Port
+type
+    Port
     -- TODO: parse these
     = Port ID (Maybe CompassPt)
 
@@ -87,6 +88,12 @@ dot =
 
 statement : Parser Stmt
 statement =
+    oneOf
+        [ edgeStmt ]
+
+
+edgeStmt : Parser Stmt
+edgeStmt =
     succeed (\a edge b -> EdgeStmt a ( edge, b ))
         |= nodeId
         |. spaces
