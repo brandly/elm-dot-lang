@@ -1,6 +1,6 @@
 module Example exposing (suite)
 
-import DotLang exposing (Dot(..), EdgeType(..), NodeId(..), Stmt(..), block, parse, statement)
+import DotLang exposing (Dot(..), EdgeType(..), ID(..), NodeId(..), Stmt(..), block, parse, statement)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Parser
@@ -21,7 +21,7 @@ suite : Test
 suite =
     let
         edge a uh b =
-            EdgeStmt (NodeId a) ( uh, NodeId b )
+            EdgeStmt (NodeId (ID a) Nothing) ( uh, NodeId (ID b) Nothing )
     in
     describe "Dot Lang Parser"
         [ test "block" <|

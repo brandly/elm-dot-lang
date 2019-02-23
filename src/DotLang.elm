@@ -1,4 +1,13 @@
-module DotLang exposing (Dot(..), EdgeType(..), NodeId(..), Stmt(..), block, parse, statement)
+module DotLang exposing
+    ( Dot(..)
+    , EdgeType(..)
+    , ID(..)
+    , NodeId(..)
+    , Stmt(..)
+    , block
+    , parse
+    , statement
+    )
 
 import Parser
     exposing
@@ -38,7 +47,29 @@ type
 
 
 type NodeId
-    = NodeId String
+    = NodeId ID (Maybe Port)
+
+
+type ID
+    = ID String
+
+
+type Port
+    -- TODO: parse these
+    = Port ID (Maybe CompassPt)
+
+
+type CompassPt
+    = N
+    | NE
+    | E
+    | SE
+    | S
+    | SW
+    | W
+    | NW
+    | C
+    | UND
 
 
 parse : String -> Result (List Parser.DeadEnd) Dot
@@ -74,7 +105,12 @@ edgeOp =
 
 nodeId : Parser NodeId
 nodeId =
-    map NodeId <|
+    map (\i -> NodeId i Nothing) id
+
+
+id : Parser ID
+id =
+    map ID <|
         -- TODO: quoted strings, HTML
         variable
             { start = \c -> Char.isAlphaNum c || c == '_'
