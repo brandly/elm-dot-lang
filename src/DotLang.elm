@@ -17,7 +17,9 @@ import Parser
         , spaces
         , succeed
         , symbol
+        , variable
         )
+import Set
 
 
 type Dot
@@ -55,11 +57,11 @@ dot =
 statement : Parser Stmt
 statement =
     succeed (\a b -> EdgeStmt a b)
-        |= id
+        |= nodeId
         |. spaces
         |. edgeOp
         |. spaces
-        |= id
+        |= nodeId
 
 
 edgeOp : Parser ()
@@ -70,14 +72,15 @@ edgeOp =
         ]
 
 
-id : Parser NodeId
-id =
-    map NodeId
-        (getChompedString <|
-            succeed identity
-                -- TODO: this should be a whitelist
-                |. chompWhile (\c -> c /= ';' && c /= '}' && c /= '-' && c /= '\n' && c /= ' ')
-        )
+nodeId : Parser NodeId
+nodeId =
+    map NodeId <|
+        -- TODO: quoted strings, HTML
+        variable
+            { start = \c -> Char.isAlphaNum c || c == '_'
+            , inner = \c -> Char.isAlphaNum c || c == '_' || Char.isDigit c
+            , reserved = Set.fromList []
+            }
 
 
 block : Parser (List Stmt)
