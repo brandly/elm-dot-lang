@@ -12,8 +12,17 @@ simpleGraph =
     "graph {\n    a -- b;\n    b -- c;\n    a -- c;\n    d -- c;\n    e -- c;\n    e -- a;\n}"
 
 
+simpleDigraph : String
+simpleDigraph =
+    "digraph {\n    a -> b;\n    b -> c;\n    c -> d;\n    d -> a;\n}"
+
+
 suite : Test
 suite =
+    let
+        edge a b =
+            EdgeStmt (NodeId a) (NodeId b)
+    in
     describe "Dot Lang Parser"
         [ test "block" <|
             \_ ->
@@ -26,12 +35,24 @@ suite =
                 Expect.equal (parse simpleGraph)
                     (Ok
                         (Dot Graph
-                            [ EdgeStmt (NodeId "a") (NodeId "b")
-                            , EdgeStmt (NodeId "b") (NodeId "c")
-                            , EdgeStmt (NodeId "a") (NodeId "c")
-                            , EdgeStmt (NodeId "d") (NodeId "c")
-                            , EdgeStmt (NodeId "e") (NodeId "c")
-                            , EdgeStmt (NodeId "e") (NodeId "a")
+                            [ edge "a" "b"
+                            , edge "b" "c"
+                            , edge "a" "c"
+                            , edge "d" "c"
+                            , edge "e" "c"
+                            , edge "e" "a"
+                            ]
+                        )
+                    )
+        , test "parsing simple digraph" <|
+            \_ ->
+                Expect.equal (parse simpleDigraph)
+                    (Ok
+                        (Dot Digraph
+                            [ edge "a" "b"
+                            , edge "b" "c"
+                            , edge "c" "d"
+                            , edge "d" "a"
                             ]
                         )
                     )

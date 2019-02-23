@@ -64,7 +64,10 @@ statement =
 
 edgeOp : Parser ()
 edgeOp =
-    symbol "--"
+    oneOf
+        [ symbol "--"
+        , symbol "->"
+        ]
 
 
 id : Parser NodeId
