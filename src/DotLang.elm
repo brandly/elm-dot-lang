@@ -1,5 +1,6 @@
 module DotLang exposing
-    ( Dot(..)
+    ( Attr(..)
+    , Dot(..)
     , EdgeType(..)
     , ID(..)
     , NodeId(..)
@@ -64,7 +65,7 @@ edgeType =
 type
     Stmt
     --TODO: (List (EdgeType, NodeId))
-    = EdgeStmt NodeId ( EdgeType, NodeId )
+    = EdgeStmt NodeId ( EdgeType, NodeId ) (List Attr)
 
 
 block : Parser (List Stmt)
@@ -87,12 +88,87 @@ statement =
 
 edgeStmt : Parser Stmt
 edgeStmt =
-    succeed (\a edge b -> EdgeStmt a ( edge, b ))
+    succeed (\a rhs attrs -> EdgeStmt a rhs attrs)
         |= nodeId
         |. spaces
+        |= edgeRHS
+        |. spaces
+        |= parseWithDefault attrList []
+
+
+edgeRHS : Parser ( EdgeType, NodeId )
+edgeRHS =
+    succeed Tuple.pair
         |= edgeOp
         |. spaces
         |= nodeId
+
+
+type AttrStmtType
+    = AttrGraph
+    | AttrNode
+    | AttrEdge
+
+
+attrStmtType : Parser AttrStmtType
+attrStmtType =
+    oneOf
+        [ map (\_ -> AttrGraph) (symbol "graph")
+        , map (\_ -> AttrNode) (symbol "node")
+        , map (\_ -> AttrEdge) (symbol "edge")
+        ]
+
+
+type AttrStmt
+    = AttrStmt AttrStmtType (List Attr)
+
+
+attrStmt : Parser AttrStmt
+attrStmt =
+    succeed AttrStmt
+        |= attrStmtType
+        |. spaces
+        |= attrList
+
+
+type Attr
+    = Attr ID ID
+
+
+parseWithDefault : Parser a -> a -> Parser a
+parseWithDefault parser default =
+    oneOf
+        [ parser
+        , map (\_ -> default) <|
+            succeed ()
+                |. chompWhile (\_ -> False)
+        ]
+
+
+attrList : Parser (List Attr)
+attrList =
+    -- TODO: trailing attr_list?
+    -- attr_list : '[' [ a_list ] ']' [ attr_list ]
+    sequence
+        { start = "["
+
+        -- TODO: comma OR semi
+        , separator = ","
+        , end = "]"
+        , spaces = spaces
+        , item = attr
+        , trailing = Optional
+        }
+
+
+attr : Parser Attr
+attr =
+    succeed Attr
+        |= id
+        |. spaces
+        |. symbol "="
+        |. spaces
+        |= id
 
 
 edgeOp : Parser EdgeType

@@ -1,6 +1,17 @@
 module Example exposing (suite)
 
-import DotLang exposing (Dot(..), EdgeType(..), ID(..), NodeId(..), Stmt(..), block, parse, statement)
+import DotLang
+    exposing
+        ( Attr(..)
+        , Dot(..)
+        , EdgeType(..)
+        , ID(..)
+        , NodeId(..)
+        , Stmt(..)
+        , block
+        , parse
+        , statement
+        )
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Parser
@@ -21,7 +32,7 @@ suite : Test
 suite =
     let
         edge a uh b =
-            EdgeStmt (NodeId (ID a) Nothing) ( uh, NodeId (ID b) Nothing )
+            EdgeStmt (NodeId (ID a) Nothing) ( uh, NodeId (ID b) Nothing ) []
     in
     describe "Dot Lang Parser"
         [ test "block" <|
@@ -30,6 +41,15 @@ suite =
         , test "statement" <|
             \_ ->
                 Expect.equal (Parser.run statement "sup -- dude;dont -- care") (Ok (edge "sup" Graph "dude"))
+        , test "statement with attrs" <|
+            \_ ->
+                Expect.equal (Parser.run statement "sup -- dude[dont=care]")
+                    (Ok
+                        (EdgeStmt (NodeId (ID "sup") Nothing)
+                            ( Graph, NodeId (ID "dude") Nothing )
+                            [ Attr (ID "dont") (ID "care") ]
+                        )
+                    )
         , test "parsing simple graph" <|
             \_ ->
                 Expect.equal (parse simpleGraph)
