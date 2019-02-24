@@ -6,7 +6,7 @@ module DotLang exposing
     , ID(..)
     , NodeId(..)
     , Stmt(..)
-    , block
+    , stmtList
     , parse
     , statement
     )
@@ -51,7 +51,7 @@ dot =
     succeed Dot
         |= edgeType
         |. spaces
-        |= block
+        |= stmtList
 
 
 type EdgeType
@@ -77,10 +77,11 @@ type Stmt
     | Subgraph
 
 
-block : Parser (List Stmt)
-block =
+stmtList : Parser (List Stmt)
+stmtList =
     sequence
         { start = "{"
+        -- TODO: the separator is optional
         , separator = ";"
         , end = "}"
         , spaces = spaces

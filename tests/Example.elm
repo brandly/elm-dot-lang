@@ -9,7 +9,7 @@ import DotLang
         , ID(..)
         , NodeId(..)
         , Stmt(..)
-        , block
+        , stmtList
         , parse
         , statement
         )
@@ -51,9 +51,9 @@ suite =
             EdgeStmt (NodeId (ID a) Nothing) ( uh, NodeId (ID b) Nothing ) [] []
     in
     describe "Dot Lang Parser"
-        [ test "block" <|
+        [ test "stmtList" <|
             \_ ->
-                Expect.equal (Parser.run block "{}") (Ok [])
+                Expect.equal (Parser.run stmtList "{}") (Ok [])
         , test "statement" <|
             \_ ->
                 Expect.equal (Parser.run statement "sup -- dude;dont -- care") (Ok (edge "sup" Graph "dude"))
