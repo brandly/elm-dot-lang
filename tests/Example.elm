@@ -9,9 +9,9 @@ import DotLang
         , ID(..)
         , NodeId(..)
         , Stmt(..)
-        , stmtList
         , parse
         , statement
+        , stmtList
         )
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
@@ -76,6 +76,20 @@ suite =
         , test "parsing simple graph" <|
             \_ ->
                 Expect.equal (parse simpleGraph)
+                    (Ok
+                        (Dot Graph
+                            [ edge "a" Graph "b"
+                            , edge "b" Graph "c"
+                            , edge "a" Graph "c"
+                            , edge "d" Graph "c"
+                            , edge "e" Graph "c"
+                            , edge "e" Graph "a"
+                            ]
+                        )
+                    )
+        , test "don't need semicolons" <|
+            \_ ->
+                Expect.equal (parse (String.filter (\c -> c /= ';') simpleGraph))
                     (Ok
                         (Dot Graph
                             [ edge "a" Graph "b"

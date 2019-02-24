@@ -6,9 +6,9 @@ module DotLang exposing
     , ID(..)
     , NodeId(..)
     , Stmt(..)
-    , stmtList
     , parse
     , statement
+    , stmtList
     )
 
 import DoubleQuoteString as DQS
@@ -79,15 +79,28 @@ type Stmt
 
 stmtList : Parser (List Stmt)
 stmtList =
-    sequence
-        { start = "{"
-        -- TODO: the separator is optional
-        , separator = ";"
-        , end = "}"
-        , spaces = spaces
-        , item = statement
-        , trailing = Optional
-        }
+    let
+        help : List Stmt -> Parser (Step (List Stmt) (List Stmt))
+        help revStmts =
+            oneOf
+                [ succeed (\stmt -> Loop (stmt :: revStmts))
+                    |= statement
+                    |. spaces
+                    |. oneOf
+                        [ chompIf ((==) ';')
+                        , symbol ""
+                        ]
+                    |. spaces
+                , succeed ()
+                    |> map (\_ -> Done (List.reverse revStmts))
+                ]
+    in
+    succeed identity
+        |. symbol "{"
+        |. spaces
+        |= loop [] help
+        |. spaces
+        |. symbol "}"
 
 
 statement : Parser Stmt
@@ -134,18 +147,18 @@ edgeRHS =
 
 repeatingRhs : Parser (List ( EdgeType, NodeId ))
 repeatingRhs =
-    loop [] repeatingRhsHelp
-
-
-repeatingRhsHelp : List ( EdgeType, NodeId ) -> Parser (Step (List ( EdgeType, NodeId )) (List ( EdgeType, NodeId )))
-repeatingRhsHelp revStmts =
-    oneOf
-        [ succeed (\stmt -> Loop (stmt :: revStmts))
-            |= edgeRHS
-            |. spaces
-        , succeed ()
-            |> map (\_ -> Done (List.reverse revStmts))
-        ]
+    let
+        help : List ( EdgeType, NodeId ) -> Parser (Step (List ( EdgeType, NodeId )) (List ( EdgeType, NodeId )))
+        help revStmts =
+            oneOf
+                [ succeed (\stmt -> Loop (stmt :: revStmts))
+                    |= edgeRHS
+                    |. spaces
+                , succeed ()
+                    |> map (\_ -> Done (List.reverse revStmts))
+                ]
+    in
+    loop [] help
 
 
 type AttrStmtType
