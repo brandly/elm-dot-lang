@@ -3,6 +3,7 @@ module Example exposing (suite)
 import DotLang
     exposing
         ( Attr(..)
+        , AttrStmtType(..)
         , Dot(..)
         , EdgeType(..)
         , ID(..)
@@ -49,6 +50,12 @@ suite =
                             ( Graph, NodeId (ID "dude") Nothing )
                             [ Attr (ID "dont") (ID "care") ]
                         )
+                    )
+        , test "attr_stmt" <|
+            \_ ->
+                Expect.equal (Parser.run statement "graph [hm=yeah]")
+                    (Ok
+                        (AttrStmt AttrGraph [ Attr (ID "hm") (ID "yeah") ])
                     )
         , test "parsing simple graph" <|
             \_ ->

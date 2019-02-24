@@ -1,5 +1,6 @@
 module DotLang exposing
     ( Attr(..)
+    , AttrStmtType(..)
     , Dot(..)
     , EdgeType(..)
     , ID(..)
@@ -65,7 +66,9 @@ edgeType =
 type
     Stmt
     --TODO: (List (EdgeType, NodeId))
-    = EdgeStmt NodeId ( EdgeType, NodeId ) (List Attr)
+    = NodeStmt NodeId (List Attr)
+    | EdgeStmt NodeId ( EdgeType, NodeId ) (List Attr)
+    | AttrStmt AttrStmtType (List Attr)
 
 
 block : Parser (List Stmt)
@@ -83,7 +86,19 @@ block =
 statement : Parser Stmt
 statement =
     oneOf
-        [ edgeStmt ]
+        [ attrStmt
+        , edgeStmt
+        -- TODO: can't parse `nodeStmt` cause it'll commit to `edgeStmt` first
+        , nodeStmt
+        ]
+
+
+nodeStmt : Parser Stmt
+nodeStmt =
+    succeed (\node attrs -> NodeStmt node attrs)
+        |= nodeId
+        |. spaces
+        |= parseWithDefault attrList []
 
 
 edgeStmt : Parser Stmt
@@ -119,11 +134,7 @@ attrStmtType =
         ]
 
 
-type AttrStmt
-    = AttrStmt AttrStmtType (List Attr)
-
-
-attrStmt : Parser AttrStmt
+attrStmt : Parser Stmt
 attrStmt =
     succeed AttrStmt
         |= attrStmtType
