@@ -65,10 +65,14 @@ edgeType =
 
 type
     Stmt
-    --TODO: (List (EdgeType, NodeId))
     = NodeStmt NodeId (List Attr)
+    --TODO: (List (EdgeType, NodeId))
     | EdgeStmt NodeId ( EdgeType, NodeId ) (List Attr)
     | AttrStmt AttrStmtType (List Attr)
+    -- probably a better name but i don't understand what it does
+    | LooseAttr Attr
+    -- TODO: parse subgraph
+    | Subgraph
 
 
 block : Parser (List Stmt)
@@ -90,6 +94,8 @@ statement =
         , edgeStmt
         -- TODO: can't parse `nodeStmt` cause it'll commit to `edgeStmt` first
         , nodeStmt
+        , map LooseAttr attr
+        -- TODO: subgraph
         ]
 
 
