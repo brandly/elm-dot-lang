@@ -29,6 +29,11 @@ simpleDigraph =
     "digraph {\n    a -> b;\n    b -> c;\n    c -> d;\n    d -> a;\n}"
 
 
+fullDigraph : String
+fullDigraph =
+    "digraph {\n    a -> b[label=\"0.2\",weight=\"0.2\"];\n    a -> c[label=\"0.4\",weight=\"0.4\"];\n    c -> b[label=\"0.6\",weight=\"0.6\"];\n    c -> e[label=\"0.6\",weight=\"0.6\"];\n    e -> e[label=\"0.1\",weight=\"0.1\"];\n    e -> b[label=\"0.7\",weight=\"0.7\"];\n}"
+
+
 suite : Test
 suite =
     let
@@ -80,6 +85,32 @@ suite =
                             , edge "b" Digraph "c"
                             , edge "c" Digraph "d"
                             , edge "d" Digraph "a"
+                            ]
+                        )
+                    )
+        , test "parsing full digraph" <|
+            \_ ->
+                Expect.equal (parse fullDigraph)
+                    (Ok
+                        (Dot Digraph
+                            [ EdgeStmt (NodeId (ID "a") Nothing)
+                                ( Digraph, NodeId (ID "b") Nothing )
+                                [ Attr (ID "label") (ID "0.2"), Attr (ID "weight") (ID "0.2") ]
+                            , EdgeStmt (NodeId (ID "a") Nothing)
+                                ( Digraph, NodeId (ID "c") Nothing )
+                                [ Attr (ID "label") (ID "0.4"), Attr (ID "weight") (ID "0.4") ]
+                            , EdgeStmt (NodeId (ID "c") Nothing)
+                                ( Digraph, NodeId (ID "b") Nothing )
+                                [ Attr (ID "label") (ID "0.6"), Attr (ID "weight") (ID "0.6") ]
+                            , EdgeStmt (NodeId (ID "c") Nothing)
+                                ( Digraph, NodeId (ID "e") Nothing )
+                                [ Attr (ID "label") (ID "0.6"), Attr (ID "weight") (ID "0.6") ]
+                            , EdgeStmt (NodeId (ID "e") Nothing)
+                                ( Digraph, NodeId (ID "e") Nothing )
+                                [ Attr (ID "label") (ID "0.1"), Attr (ID "weight") (ID "0.1") ]
+                            , EdgeStmt (NodeId (ID "e") Nothing)
+                                ( Digraph, NodeId (ID "b") Nothing )
+                                [ Attr (ID "label") (ID "0.7"), Attr (ID "weight") (ID "0.7") ]
                             ]
                         )
                     )

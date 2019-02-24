@@ -11,6 +11,7 @@ module DotLang exposing
     , statement
     )
 
+import DoubleQuoteString as DQS
 import Parser
     exposing
         ( (|.)
@@ -18,12 +19,14 @@ import Parser
         , Parser
         , Step(..)
         , Trailing(..)
+        , andThen
         , chompIf
         , chompWhile
         , getChompedString
         , loop
         , map
         , oneOf
+        , problem
         , sequence
         , spaces
         , succeed
@@ -63,15 +66,14 @@ edgeType =
         ]
 
 
-type
-    Stmt
+type Stmt
     = NodeStmt NodeId (List Attr)
-    --TODO: (List (EdgeType, NodeId))
+      --TODO: (List (EdgeType, NodeId))
     | EdgeStmt NodeId ( EdgeType, NodeId ) (List Attr)
     | AttrStmt AttrStmtType (List Attr)
-    -- probably a better name but i don't understand what it does
+      -- probably a better name but i don't understand what it does
     | LooseAttr Attr
-    -- TODO: parse subgraph
+      -- TODO: parse subgraph
     | Subgraph
 
 
@@ -92,9 +94,11 @@ statement =
     oneOf
         [ attrStmt
         , edgeStmt
+
         -- TODO: can't parse `nodeStmt` cause it'll commit to `edgeStmt` first
         , nodeStmt
         , map LooseAttr attr
+
         -- TODO: subgraph
         ]
 
@@ -212,12 +216,15 @@ type ID
 id : Parser ID
 id =
     map ID <|
-        -- TODO: quoted strings, HTML
-        variable
-            { start = \c -> Char.isAlphaNum c || c == '_'
-            , inner = \c -> Char.isAlphaNum c || c == '_' || Char.isDigit c
-            , reserved = Set.fromList []
-            }
+        -- TODO: HTML
+        oneOf
+            [ DQS.string
+            , variable
+                { start = \c -> Char.isAlphaNum c || c == '_'
+                , inner = \c -> Char.isAlphaNum c || c == '_' || Char.isDigit c
+                , reserved = Set.fromList []
+                }
+            ]
 
 
 type
