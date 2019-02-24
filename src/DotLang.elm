@@ -22,6 +22,7 @@ import Parser
         , andThen
         , chompIf
         , chompWhile
+        , float
         , getChompedString
         , loop
         , map
@@ -220,10 +221,11 @@ id =
         oneOf
             [ DQS.string
             , variable
-                { start = \c -> Char.isAlphaNum c || c == '_'
-                , inner = \c -> Char.isAlphaNum c || c == '_' || Char.isDigit c
+                { start = \c -> Char.isAlpha c || c == '_'
+                , inner = \c -> Char.isAlphaNum c || c == '_'
                 , reserved = Set.fromList []
                 }
+            , map String.fromFloat float
             ]
 
 

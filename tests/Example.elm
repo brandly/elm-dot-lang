@@ -34,6 +34,11 @@ fullDigraph =
     "digraph {\n    a -> b[label=\"0.2\",weight=\"0.2\"];\n    a -> c[label=\"0.4\",weight=\"0.4\"];\n    c -> b[label=\"0.6\",weight=\"0.6\"];\n    c -> e[label=\"0.6\",weight=\"0.6\"];\n    e -> e[label=\"0.1\",weight=\"0.1\"];\n    e -> b[label=\"0.7\",weight=\"0.7\"];\n}"
 
 
+showingPath : String
+showingPath =
+    "graph {\n    a -- b[color=red,penwidth=3.0];\n    b -- c;\n    c -- d[color=red,penwidth=3.0];\n    d -- e;\n    e -- f;\n    a -- d;\n    b -- d[color=red,penwidth=3.0];\n    c -- f[color=red,penwidth=3.0];\n}"
+
+
 suite : Test
 suite =
     let
@@ -111,6 +116,38 @@ suite =
                             , EdgeStmt (NodeId (ID "e") Nothing)
                                 ( Digraph, NodeId (ID "b") Nothing )
                                 [ Attr (ID "label") (ID "0.7"), Attr (ID "weight") (ID "0.7") ]
+                            ]
+                        )
+                    )
+        , test "parsing 'showing a path'" <|
+            \_ ->
+                Expect.equal (parse showingPath)
+                    (Ok
+                        (Dot Graph
+                            [ EdgeStmt (NodeId (ID "a") Nothing)
+                                ( Graph, NodeId (ID "b") Nothing )
+                                [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
+                            , EdgeStmt (NodeId (ID "b") Nothing)
+                                ( Graph, NodeId (ID "c") Nothing )
+                                []
+                            , EdgeStmt (NodeId (ID "c") Nothing)
+                                ( Graph, NodeId (ID "d") Nothing )
+                                [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
+                            , EdgeStmt (NodeId (ID "d") Nothing)
+                                ( Graph, NodeId (ID "e") Nothing )
+                                []
+                            , EdgeStmt (NodeId (ID "e") Nothing)
+                                ( Graph, NodeId (ID "f") Nothing )
+                                []
+                            , EdgeStmt (NodeId (ID "a") Nothing)
+                                ( Graph, NodeId (ID "d") Nothing )
+                                []
+                            , EdgeStmt (NodeId (ID "b") Nothing)
+                                ( Graph, NodeId (ID "d") Nothing )
+                                [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
+                            , EdgeStmt (NodeId (ID "c") Nothing)
+                                ( Graph, NodeId (ID "f") Nothing )
+                                [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
                             ]
                         )
                     )
