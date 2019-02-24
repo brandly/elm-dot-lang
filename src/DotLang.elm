@@ -69,8 +69,7 @@ edgeType =
 
 type Stmt
     = NodeStmt NodeId (List Attr)
-      --TODO: (List (EdgeType, NodeId))
-    | EdgeStmt NodeId ( EdgeType, NodeId ) (List Attr)
+    | EdgeStmt NodeId ( EdgeType, NodeId ) (List ( EdgeType, NodeId )) (List Attr)
     | AttrStmt AttrStmtType (List Attr)
       -- probably a better name but i don't understand what it does
     | LooseAttr Attr
@@ -96,7 +95,7 @@ statement =
         [ attrStmt
         , edgeStmt
 
-        -- TODO: can't parse `nodeStmt` cause it'll commit to `edgeStmt` first
+        -- TODO: can't parse `nodeStmt`/`LooseAttr` cause it'll commit to `edgeStmt` first
         , nodeStmt
         , map LooseAttr attr
 
@@ -119,6 +118,8 @@ edgeStmt =
         |. spaces
         |= edgeRHS
         |. spaces
+        |= repeatingRhs
+        |. spaces
         |= parseWithDefault attrList []
 
 
@@ -128,6 +129,22 @@ edgeRHS =
         |= edgeOp
         |. spaces
         |= nodeId
+
+
+repeatingRhs : Parser (List ( EdgeType, NodeId ))
+repeatingRhs =
+    loop [] repeatingRhsHelp
+
+
+repeatingRhsHelp : List ( EdgeType, NodeId ) -> Parser (Step (List ( EdgeType, NodeId )) (List ( EdgeType, NodeId )))
+repeatingRhsHelp revStmts =
+    oneOf
+        [ succeed (\stmt -> Loop (stmt :: revStmts))
+            |= edgeRHS
+            |. spaces
+        , succeed ()
+            |> map (\_ -> Done (List.reverse revStmts))
+        ]
 
 
 type AttrStmtType

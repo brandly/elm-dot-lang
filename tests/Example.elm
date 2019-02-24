@@ -39,11 +39,16 @@ showingPath =
     "graph {\n    a -- b[color=red,penwidth=3.0];\n    b -- c;\n    c -- d[color=red,penwidth=3.0];\n    d -- e;\n    e -- f;\n    a -- d;\n    b -- d[color=red,penwidth=3.0];\n    c -- f[color=red,penwidth=3.0];\n}"
 
 
+showingPathShortHand : String
+showingPathShortHand =
+    "graph {\n    a -- b -- d -- c -- f[color=red,penwidth=3.0];\n    b -- c;\n    d -- e;\n    e -- f;\n    a -- d;\n}"
+
+
 suite : Test
 suite =
     let
         edge a uh b =
-            EdgeStmt (NodeId (ID a) Nothing) ( uh, NodeId (ID b) Nothing ) []
+            EdgeStmt (NodeId (ID a) Nothing) ( uh, NodeId (ID b) Nothing ) [] []
     in
     describe "Dot Lang Parser"
         [ test "block" <|
@@ -58,6 +63,7 @@ suite =
                     (Ok
                         (EdgeStmt (NodeId (ID "sup") Nothing)
                             ( Graph, NodeId (ID "dude") Nothing )
+                            []
                             [ Attr (ID "dont") (ID "care") ]
                         )
                     )
@@ -100,21 +106,27 @@ suite =
                         (Dot Digraph
                             [ EdgeStmt (NodeId (ID "a") Nothing)
                                 ( Digraph, NodeId (ID "b") Nothing )
+                                []
                                 [ Attr (ID "label") (ID "0.2"), Attr (ID "weight") (ID "0.2") ]
                             , EdgeStmt (NodeId (ID "a") Nothing)
                                 ( Digraph, NodeId (ID "c") Nothing )
+                                []
                                 [ Attr (ID "label") (ID "0.4"), Attr (ID "weight") (ID "0.4") ]
                             , EdgeStmt (NodeId (ID "c") Nothing)
                                 ( Digraph, NodeId (ID "b") Nothing )
+                                []
                                 [ Attr (ID "label") (ID "0.6"), Attr (ID "weight") (ID "0.6") ]
                             , EdgeStmt (NodeId (ID "c") Nothing)
                                 ( Digraph, NodeId (ID "e") Nothing )
+                                []
                                 [ Attr (ID "label") (ID "0.6"), Attr (ID "weight") (ID "0.6") ]
                             , EdgeStmt (NodeId (ID "e") Nothing)
                                 ( Digraph, NodeId (ID "e") Nothing )
+                                []
                                 [ Attr (ID "label") (ID "0.1"), Attr (ID "weight") (ID "0.1") ]
                             , EdgeStmt (NodeId (ID "e") Nothing)
                                 ( Digraph, NodeId (ID "b") Nothing )
+                                []
                                 [ Attr (ID "label") (ID "0.7"), Attr (ID "weight") (ID "0.7") ]
                             ]
                         )
@@ -126,28 +138,40 @@ suite =
                         (Dot Graph
                             [ EdgeStmt (NodeId (ID "a") Nothing)
                                 ( Graph, NodeId (ID "b") Nothing )
-                                [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
-                            , EdgeStmt (NodeId (ID "b") Nothing)
-                                ( Graph, NodeId (ID "c") Nothing )
                                 []
+                                [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
+                            , edge "b" Graph "c"
                             , EdgeStmt (NodeId (ID "c") Nothing)
                                 ( Graph, NodeId (ID "d") Nothing )
+                                []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
-                            , EdgeStmt (NodeId (ID "d") Nothing)
-                                ( Graph, NodeId (ID "e") Nothing )
-                                []
-                            , EdgeStmt (NodeId (ID "e") Nothing)
-                                ( Graph, NodeId (ID "f") Nothing )
-                                []
-                            , EdgeStmt (NodeId (ID "a") Nothing)
-                                ( Graph, NodeId (ID "d") Nothing )
-                                []
+                            , edge "d" Graph "e"
+                            , edge "e" Graph "f"
+                            , edge "a" Graph "d"
                             , EdgeStmt (NodeId (ID "b") Nothing)
                                 ( Graph, NodeId (ID "d") Nothing )
+                                []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
                             , EdgeStmt (NodeId (ID "c") Nothing)
                                 ( Graph, NodeId (ID "f") Nothing )
+                                []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
+                            ]
+                        )
+                    )
+        , test "parsing 'showing a path' shorthand" <|
+            \_ ->
+                Expect.equal (parse showingPathShortHand)
+                    (Ok
+                        (Dot Graph
+                            [ EdgeStmt (NodeId (ID "a") Nothing)
+                                ( Graph, NodeId (ID "b") Nothing )
+                                [ ( Graph, NodeId (ID "d") Nothing ), ( Graph, NodeId (ID "c") Nothing ), ( Graph, NodeId (ID "f") Nothing ) ]
+                                [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
+                            , edge "b" Graph "c"
+                            , edge "d" Graph "e"
+                            , edge "e" Graph "f"
+                            , edge "a" Graph "d"
                             ]
                         )
                     )
