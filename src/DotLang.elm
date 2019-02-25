@@ -40,9 +40,9 @@ type EdgeType
 
 edgeType : Parser EdgeType
 edgeType =
-    oneOf
-        [ map (\_ -> Graph) (symbol "graph")
-        , map (\_ -> Digraph) (symbol "digraph")
+    symbolToType
+        [ ( "graph", Graph )
+        , ( "digraph", Digraph )
         ]
 
 
@@ -124,9 +124,9 @@ edgeRHS =
 
 edgeOp : Parser EdgeType
 edgeOp =
-    oneOf
-        [ map (\_ -> Graph) (symbol "--")
-        , map (\_ -> Digraph) (symbol "->")
+    symbolToType
+        [ ( "--", Graph )
+        , ( "->", Digraph )
         ]
 
 
@@ -154,10 +154,10 @@ type AttrStmtType
 
 attrStmtType : Parser AttrStmtType
 attrStmtType =
-    oneOf
-        [ map (\_ -> AttrGraph) (symbol "graph")
-        , map (\_ -> AttrNode) (symbol "node")
-        , map (\_ -> AttrEdge) (symbol "edge")
+    symbolToType
+        [ ( "graph", AttrGraph )
+        , ( "node", AttrNode )
+        , ( "edge", AttrEdge )
         ]
 
 
@@ -263,6 +263,14 @@ type CompassPt
 
 
 --
+
+
+symbolToType : List ( String, a ) -> Parser a
+symbolToType list =
+    oneOf <|
+        List.map
+            (\( str, t ) -> map (\_ -> t) (symbol str))
+            list
 
 
 parseWithDefault : Parser a -> a -> Parser a
