@@ -44,6 +44,12 @@ showingPathShortHand =
     "graph {\n    a -- b -- d -- c -- f[color=red,penwidth=3.0];\n    b -- c;\n    d -- e;\n    e -- f;\n    a -- d;\n}"
 
 
+subgraph : String
+subgraph =
+    --"digraph {\n    subgraph cluster_0 {\n        label=\"Subgraph A\";\n        a -> b;\n        b -> c;\n        c -> d;\n    }\n\n    subgraph cluster_1 {\n        label=\"Subgraph B\";\n        a -> f;\n        f -> c;\n    }\n}\n    "
+    "digraph {\n    subgraph cluster_0 {\n        a -> b;\n        b -> c;\n        c -> d;\n    }\n\n    subgraph cluster_1 {\n        a -> f;\n        f -> c;\n    }\n}"
+
+
 suite : Test
 suite =
     let
@@ -186,6 +192,23 @@ suite =
                             , edge "d" Graph "e"
                             , edge "e" Graph "f"
                             , edge "a" Graph "d"
+                            ]
+                        )
+                    )
+        , test "parsing subgraph" <|
+            \_ ->
+                Expect.equal (parse subgraph)
+                    (Ok
+                        (Dot Digraph
+                            [ Subgraph (Just (ID "cluster_0"))
+                                [ edge "a" Digraph "b"
+                                , edge "b" Digraph "c"
+                                , edge "c" Digraph "d"
+                                ]
+                            , Subgraph (Just (ID "cluster_1"))
+                                [ edge "a" Digraph "f"
+                                , edge "f" Digraph "c"
+                                ]
                             ]
                         )
                     )

@@ -12,28 +12,7 @@ module DotLang exposing
     )
 
 import DoubleQuoteString as DQS
-import Parser
-    exposing
-        ( (|.)
-        , (|=)
-        , Parser
-        , Step(..)
-        , Trailing(..)
-        , andThen
-        , chompIf
-        , chompWhile
-        , float
-        , getChompedString
-        , loop
-        , map
-        , oneOf
-        , problem
-        , sequence
-        , spaces
-        , succeed
-        , symbol
-        , variable
-        )
+import Parser exposing (..)
 import Set
 
 
@@ -73,8 +52,7 @@ type Stmt
     | AttrStmt AttrStmtType (List Attr)
       -- probably a better name but i don't understand what it does
     | LooseAttr Attr
-      -- TODO: parse subgraph
-    | Subgraph
+    | Subgraph (Maybe ID) (List Stmt)
 
 
 stmtList : Parser (List Stmt)
@@ -107,13 +85,12 @@ statement : Parser Stmt
 statement =
     oneOf
         [ attrStmt
+        , subgraph
         , edgeStmt
 
         -- TODO: can't parse `nodeStmt`/`LooseAttr` cause it'll commit to `edgeStmt` first
         , nodeStmt
         , map LooseAttr attr
-
-        -- TODO: subgraph
         ]
 
 
@@ -143,6 +120,14 @@ edgeRHS =
         |= edgeOp
         |. spaces
         |= nodeId
+
+
+edgeOp : Parser EdgeType
+edgeOp =
+    oneOf
+        [ map (\_ -> Graph) (symbol "--")
+        , map (\_ -> Digraph) (symbol "->")
+        ]
 
 
 repeatingRhs : Parser (List ( EdgeType, NodeId ))
@@ -188,16 +173,6 @@ type Attr
     = Attr ID ID
 
 
-parseWithDefault : Parser a -> a -> Parser a
-parseWithDefault parser default =
-    oneOf
-        [ parser
-        , map (\_ -> default) <|
-            succeed ()
-                |. chompWhile (\_ -> False)
-        ]
-
-
 attrList : Parser (List Attr)
 attrList =
     -- TODO: trailing attr_list?
@@ -224,11 +199,18 @@ attr =
         |= id
 
 
-edgeOp : Parser EdgeType
-edgeOp =
+subgraph : Parser Stmt
+subgraph =
     oneOf
-        [ map (\_ -> Graph) (symbol "--")
-        , map (\_ -> Digraph) (symbol "->")
+        [ succeed Subgraph
+            |. symbol "subgraph"
+            |. spaces
+            |= maybeParse id
+            |. spaces
+            |= stmtList
+        , succeed (Subgraph Nothing)
+            |. spaces
+            |= stmtList
         ]
 
 
@@ -277,3 +259,27 @@ type CompassPt
     | NW
     | C
     | UND
+
+
+
+--
+
+
+parseWithDefault : Parser a -> a -> Parser a
+parseWithDefault parser default =
+    oneOf
+        [ parser
+        , map (\_ -> default) <|
+            succeed ()
+                |. chompWhile (\_ -> False)
+        ]
+
+
+maybeParse : Parser a -> Parser (Maybe a)
+maybeParse parser =
+    oneOf
+        [ map Just parser
+        , map (\_ -> Nothing) <|
+            succeed ()
+                |. chompWhile (\_ -> False)
+        ]
