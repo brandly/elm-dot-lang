@@ -51,6 +51,11 @@ subgraph =
     "digraph {\n    subgraph cluster_0 {\n        label=\"Subgraph A\";\n        a -> b;\n        b -> c;\n        c -> d;\n    }\n\n    subgraph cluster_1 {\n        label=\"Subgraph B\";\n        a -> f;\n        f -> c;\n    }\n}\n    "
 
 
+largeGraph : String
+largeGraph =
+    "graph {\n    rankdir=LR; // Left to Right, instead of Top to Bottom\n    a -- { b c d };\n    b -- { c e };\n    c -- { e f };\n    d -- { f g };\n    e -- h;\n    f -- { h i j g };\n    g -- k;\n    h -- { o l };\n    i -- { l m j };\n    j -- { m n k };\n    k -- { n r };\n    l -- { o m };\n    m -- { o p n };\n    n -- { q r };\n    o -- { s p };\n    p -- { s t q };\n    q -- { t r };\n    r -- t;\n    s -- z;\n    t -- z;\n}"
+
+
 suite : Test
 suite =
     let
@@ -243,6 +248,222 @@ suite =
                                         ]
                                     )
                                 )
+                                []
+                                []
+                            ]
+                        )
+                    )
+        , test "large graph" <|
+            \_ ->
+                Expect.equal
+                    (parse
+                        (String.join "\n"
+                            [ "graph {"
+                            , "    rankdir=LR; // Left to Right, instead of Top to Bottom"
+                            , "    a -- { b c d };"
+                            , "    b -- { c e };"
+                            , "    c -- { e f };"
+                            , "    d -- { f g };"
+                            , "    e -- h;"
+                            , "    f -- { h i j g };"
+                            , "    g -- k;"
+                            , "    h -- { o l };"
+                            , "    i -- { l m j };"
+                            , "    j -- { m n k };"
+                            , "    k -- { n r };"
+                            , "    l -- { o m };"
+                            , "    m -- { o p n };"
+                            , "    n -- { q r };"
+                            , "    o -- { s p };"
+                            , "    p -- { s t q };"
+                            , "    q -- { t r };"
+                            , "    r -- t;"
+                            , "    s -- z;"
+                            , "    t -- z;"
+                            , "}"
+                            ]
+                        )
+                    )
+                    (Ok
+                        (Dot Graph
+                            [ LooseAttr (Attr (ID "rankdir") (ID "LR"))
+                            , Comment "// Left to Right, instead of Top to Bottom"
+                            , EdgeStmt (NodeId (ID "a") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "b") Nothing) []
+                                        , NodeStmt (NodeId (ID "c") Nothing) []
+                                        , NodeStmt (NodeId (ID "d") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "b") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "c") Nothing) []
+                                        , NodeStmt (NodeId (ID "e") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "c") Nothing)
+                                (EdgeSubgraph
+                                    Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "e") Nothing) []
+                                        , NodeStmt (NodeId (ID "f") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "d") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "f") Nothing) []
+                                        , NodeStmt (NodeId (ID "g") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "e") Nothing)
+                                (EdgeNode Graph (NodeId (ID "h") Nothing))
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "f") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "h") Nothing) []
+                                        , NodeStmt (NodeId (ID "i") Nothing) []
+                                        , NodeStmt (NodeId (ID "j") Nothing) []
+                                        , NodeStmt (NodeId (ID "g") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "g") Nothing)
+                                (EdgeNode Graph (NodeId (ID "k") Nothing))
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "h") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "o") Nothing) []
+                                        , NodeStmt (NodeId (ID "l") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "i") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "l") Nothing) []
+                                        , NodeStmt (NodeId (ID "m") Nothing) []
+                                        , NodeStmt (NodeId (ID "j") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "j") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "m") Nothing) []
+                                        , NodeStmt (NodeId (ID "n") Nothing) []
+                                        , NodeStmt (NodeId (ID "k") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "k") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "n") Nothing) []
+                                        , NodeStmt (NodeId (ID "r") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "l") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "o") Nothing) []
+                                        , NodeStmt (NodeId (ID "m") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "m") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "o") Nothing) []
+                                        , NodeStmt (NodeId (ID "p") Nothing) []
+                                        , NodeStmt (NodeId (ID "n") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "n") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "q") Nothing) []
+                                        , NodeStmt (NodeId (ID "r") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "o") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "s") Nothing) []
+                                        , NodeStmt (NodeId (ID "p") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "p") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "s") Nothing) []
+                                        , NodeStmt (NodeId (ID "t") Nothing) []
+                                        , NodeStmt (NodeId (ID "q") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "q") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "t") Nothing) []
+                                        , NodeStmt (NodeId (ID "r") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "r") Nothing)
+                                (EdgeNode Graph (NodeId (ID "t") Nothing))
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "s") Nothing)
+                                (EdgeNode Graph (NodeId (ID "z") Nothing))
+                                []
+                                []
+                            , EdgeStmt (NodeId (ID "t") Nothing)
+                                (EdgeNode Graph (NodeId (ID "z") Nothing))
                                 []
                                 []
                             ]
