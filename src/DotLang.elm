@@ -86,17 +86,42 @@ statement =
     oneOf
         [ attrStmt
         , subgraph
-        , edgeStmt
 
-        -- TODO: can't parse `nodeStmt`/`LooseAttr` cause it'll commit to `edgeStmt` first
-        , nodeStmt
-        , map LooseAttr attr
+        -- TODO: can we refactor to use these original definitions?
+        --, edgeStmt
+        --, nodeStmt
+        --, map LooseAttr attr
+        , andThen
+            (\( id_, maybePort ) ->
+                oneOf
+                    [ -- TODO: we should only consider LooseAttr if maybePort == Nothing
+                      map LooseAttr <|
+                        succeed (Attr id_)
+                            |. symbol "="
+                            |. spaces
+                            |= id
+                    , succeed (EdgeStmt (NodeId id_ maybePort))
+                        |= edgeRHS
+                        |. spaces
+                        |= repeatingRhs
+                        |. spaces
+                        |= parseWithDefault attrList []
+                    , succeed (NodeStmt (NodeId id_ maybePort))
+                        |= parseWithDefault attrList []
+                    ]
+            )
+            (succeed Tuple.pair
+                |= id
+                |. spaces
+                |= maybeParse port_
+                |. spaces
+            )
         ]
 
 
 nodeStmt : Parser Stmt
 nodeStmt =
-    succeed (\node attrs -> NodeStmt node attrs)
+    succeed NodeStmt
         |= nodeId
         |. spaces
         |= parseWithDefault attrList []
@@ -104,7 +129,7 @@ nodeStmt =
 
 edgeStmt : Parser Stmt
 edgeStmt =
-    succeed (\a rhs attrs -> EdgeStmt a rhs attrs)
+    succeed EdgeStmt
         |= nodeId
         |. spaces
         |= edgeRHS

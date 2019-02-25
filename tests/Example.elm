@@ -46,8 +46,7 @@ showingPathShortHand =
 
 subgraph : String
 subgraph =
-    --"digraph {\n    subgraph cluster_0 {\n        label=\"Subgraph A\";\n        a -> b;\n        b -> c;\n        c -> d;\n    }\n\n    subgraph cluster_1 {\n        label=\"Subgraph B\";\n        a -> f;\n        f -> c;\n    }\n}\n    "
-    "digraph {\n    subgraph cluster_0 {\n        a -> b;\n        b -> c;\n        c -> d;\n    }\n\n    subgraph cluster_1 {\n        a -> f;\n        f -> c;\n    }\n}"
+    "digraph {\n    subgraph cluster_0 {\n        label=\"Subgraph A\";\n        a -> b;\n        b -> c;\n        c -> d;\n    }\n\n    subgraph cluster_1 {\n        label=\"Subgraph B\";\n        a -> f;\n        f -> c;\n    }\n}\n    "
 
 
 suite : Test
@@ -201,12 +200,14 @@ suite =
                     (Ok
                         (Dot Digraph
                             [ Subgraph (Just (ID "cluster_0"))
-                                [ edge "a" Digraph "b"
+                                [ LooseAttr (Attr (ID "label") (ID "Subgraph A"))
+                                , edge "a" Digraph "b"
                                 , edge "b" Digraph "c"
                                 , edge "c" Digraph "d"
                                 ]
                             , Subgraph (Just (ID "cluster_1"))
-                                [ edge "a" Digraph "f"
+                                [ LooseAttr (Attr (ID "label") (ID "Subgraph B"))
+                                , edge "a" Digraph "f"
                                 , edge "f" Digraph "c"
                                 ]
                             ]
