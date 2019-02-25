@@ -48,7 +48,7 @@ edgeType =
 
 type Stmt
     = NodeStmt NodeId (List Attr)
-    | EdgeStmt NodeId ( EdgeType, NodeId ) (List ( EdgeType, NodeId )) (List Attr)
+    | EdgeStmt NodeId EdgeRHS (List EdgeRHS) (List Attr)
     | AttrStmt AttrStmtType (List Attr)
       -- probably a better name but i don't understand what it does
     | LooseAttr Attr
@@ -131,6 +131,7 @@ nodeStmt =
 
 edgeStmt : Parser Stmt
 edgeStmt =
+    -- TODO: edgeStmt can start with a subgraph
     succeed EdgeStmt
         |= nodeId
         |. spaces
@@ -141,8 +142,13 @@ edgeStmt =
         |= parseWithDefault attrList []
 
 
-edgeRHS : Parser ( EdgeType, NodeId )
+type alias EdgeRHS =
+    ( EdgeType, NodeId )
+
+
+edgeRHS : Parser EdgeRHS
 edgeRHS =
+    -- TODO: edgeRHS can start with a subgraph
     succeed Tuple.pair
         |= edgeOp
         |. spaces
@@ -157,10 +163,10 @@ edgeOp =
         ]
 
 
-repeatingRhs : Parser (List ( EdgeType, NodeId ))
+repeatingRhs : Parser (List EdgeRHS)
 repeatingRhs =
     let
-        help : List ( EdgeType, NodeId ) -> Parser (Step (List ( EdgeType, NodeId )) (List ( EdgeType, NodeId )))
+        help : List EdgeRHS -> Parser (Step (List EdgeRHS) (List EdgeRHS))
         help revStmts =
             oneOf
                 [ succeed (\stmt -> Loop (stmt :: revStmts))
