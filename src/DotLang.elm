@@ -53,6 +53,7 @@ type Stmt
       -- probably a better name but i don't understand what it does
     | LooseAttr Attr
     | Subgraph (Maybe ID) (List Stmt)
+    | Comment String
 
 
 stmtList : Parser (List Stmt)
@@ -84,7 +85,8 @@ stmtList =
 statement : Parser Stmt
 statement =
     oneOf
-        [ attrStmt
+        [ comment
+        , attrStmt
         , subgraph
 
         -- TODO: can we refactor to use these original definitions?
@@ -320,8 +322,16 @@ compassPt =
         ]
 
 
-
---
+comment : Parser Stmt
+comment =
+    -- TODO: a line beginning with a '#' character is considered a line output
+    -- from a C preprocessor (e.g., # 34 to indicate line 34 ) and discarded.
+    map Comment <|
+        getChompedString <|
+            oneOf
+                [ lineComment "//"
+                , multiComment "/*" "*/" NotNestable
+                ]
 
 
 symbolToType : List ( String, a ) -> Parser a
