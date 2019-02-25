@@ -21,39 +21,71 @@ import Parser
 import Test exposing (..)
 
 
+
+-- examples from https://graphs.grevian.org/example
+
+
 simpleGraph : String
 simpleGraph =
-    "graph {\n    a -- b;\n    b -- c;\n    a -- c;\n    d -- c;\n    e -- c;\n    e -- a;\n}"
-
-
-simpleDigraph : String
-simpleDigraph =
-    "digraph {\n    a -> b;\n    b -> c;\n    c -> d;\n    d -> a;\n}"
-
-
-fullDigraph : String
-fullDigraph =
-    "digraph {\n    a -> b[label=\"0.2\",weight=\"0.2\"];\n    a -> c[label=\"0.4\",weight=\"0.4\"];\n    c -> b[label=\"0.6\",weight=\"0.6\"];\n    c -> e[label=\"0.6\",weight=\"0.6\"];\n    e -> e[label=\"0.1\",weight=\"0.1\"];\n    e -> b[label=\"0.7\",weight=\"0.7\"];\n}"
+    String.join "\n"
+        [ "graph {"
+        , "    a -- b;"
+        , "    b -- c;"
+        , "    a -- c;"
+        , "    d -- c;"
+        , "    e -- c;"
+        , "    e -- a;"
+        , "}"
+        ]
 
 
 showingPath : String
 showingPath =
-    "graph {\n    a -- b[color=red,penwidth=3.0];\n    b -- c;\n    c -- d[color=red,penwidth=3.0];\n    d -- e;\n    e -- f;\n    a -- d;\n    b -- d[color=red,penwidth=3.0];\n    c -- f[color=red,penwidth=3.0];\n}"
+    String.join "\n"
+        [ "graph {"
+        , "    a -- b[color=red,penwidth=3.0];"
+        , "    b -- c;"
+        , "    c -- d[color=red,penwidth=3.0];"
+        , "    d -- e;"
+        , "    e -- f;"
+        , "    a -- d;"
+        , "    b -- d[color=red,penwidth=3.0];"
+        , "    c -- f[color=red,penwidth=3.0];"
+        , "}"
+        ]
 
 
 showingPathShortHand : String
 showingPathShortHand =
-    "graph {\n    a -- b -- d -- c -- f[color=red,penwidth=3.0];\n    b -- c;\n    d -- e;\n    e -- f;\n    a -- d;\n}"
+    String.join "\n"
+        [ "graph {"
+        , "    a -- b -- d -- c -- f[color=red,penwidth=3.0];"
+        , "    b -- c;"
+        , "    d -- e;"
+        , "    e -- f;"
+        , "    a -- d;"
+        , "}"
+        ]
 
 
 subgraph : String
 subgraph =
-    "digraph {\n    subgraph cluster_0 {\n        label=\"Subgraph A\";\n        a -> b;\n        b -> c;\n        c -> d;\n    }\n\n    subgraph cluster_1 {\n        label=\"Subgraph B\";\n        a -> f;\n        f -> c;\n    }\n}\n    "
-
-
-largeGraph : String
-largeGraph =
-    "graph {\n    rankdir=LR; // Left to Right, instead of Top to Bottom\n    a -- { b c d };\n    b -- { c e };\n    c -- { e f };\n    d -- { f g };\n    e -- h;\n    f -- { h i j g };\n    g -- k;\n    h -- { o l };\n    i -- { l m j };\n    j -- { m n k };\n    k -- { n r };\n    l -- { o m };\n    m -- { o p n };\n    n -- { q r };\n    o -- { s p };\n    p -- { s t q };\n    q -- { t r };\n    r -- t;\n    s -- z;\n    t -- z;\n}"
+    String.join "\n"
+        [ "digraph {"
+        , "    subgraph cluster_0 {"
+        , "        label=\"Subgraph A\";"
+        , "        a -> b;"
+        , "        b -> c;"
+        , "        c -> d;"
+        , "    }"
+        , "    subgraph cluster_1 {"
+        , "        label=\"Subgraph B\";"
+        , "        a -> f;"
+        , "        f -> c;"
+        , "    }"
+        , "}"
+        , "    "
+        ]
 
 
 suite : Test
@@ -116,7 +148,18 @@ suite =
                     )
         , test "parsing simple digraph" <|
             \_ ->
-                Expect.equal (parse simpleDigraph)
+                Expect.equal
+                    (parse
+                        (String.join "\n"
+                            [ "digraph {"
+                            , "    a -> b;"
+                            , "    b -> c;"
+                            , "    c -> d;"
+                            , "    d -> a;"
+                            , "}"
+                            ]
+                        )
+                    )
                     (Ok
                         (Dot Digraph
                             [ edge "a" Digraph "b"
@@ -128,7 +171,20 @@ suite =
                     )
         , test "parsing full digraph" <|
             \_ ->
-                Expect.equal (parse fullDigraph)
+                Expect.equal
+                    (parse
+                        (String.join "\n"
+                            [ "digraph {"
+                            , "    a -> b[label=\"0.2\",weight=\"0.2\"];"
+                            , "    a -> c[label=\"0.4\",weight=\"0.4\"];"
+                            , "    c -> b[label=\"0.6\",weight=\"0.6\"];"
+                            , "    c -> e[label=\"0.6\",weight=\"0.6\"];"
+                            , "    e -> e[label=\"0.1\",weight=\"0.1\"];"
+                            , "    e -> b[label=\"0.7\",weight=\"0.7\"];"
+                            , "}"
+                            ]
+                        )
+                    )
                     (Ok
                         (Dot Digraph
                             [ EdgeStmt (NodeId (ID "a") Nothing)
