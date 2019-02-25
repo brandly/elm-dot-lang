@@ -220,7 +220,10 @@ type NodeId
 
 nodeId : Parser NodeId
 nodeId =
-    map (\i -> NodeId i Nothing) id
+    succeed NodeId
+        |= id
+        |. spaces
+        |= maybeParse port_
 
 
 type ID
@@ -242,10 +245,25 @@ id =
             ]
 
 
-type
-    Port
-    -- TODO: parse these
-    = Port ID (Maybe CompassPt)
+type Port
+    = PortId ID (Maybe CompassPt)
+    | PortPt CompassPt
+
+
+port_ : Parser Port
+port_ =
+    oneOf
+        [ succeed PortPt
+            |. symbol ":"
+            |. spaces
+            |= compassPt
+        , succeed PortId
+            |. symbol ":"
+            |. spaces
+            |= id
+            |. spaces
+            |= maybeParse compassPt
+        ]
 
 
 type CompassPt
@@ -259,6 +277,22 @@ type CompassPt
     | NW
     | C
     | UND
+
+
+compassPt : Parser CompassPt
+compassPt =
+    symbolToType
+        [ ( "n", N )
+        , ( "ne", NE )
+        , ( "e", E )
+        , ( "se", SE )
+        , ( "s", S )
+        , ( "sw", SW )
+        , ( "w", W )
+        , ( "nw", NW )
+        , ( "c", C )
+        , ( "_", UND )
+        ]
 
 
 
