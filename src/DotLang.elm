@@ -2,10 +2,12 @@ module DotLang exposing
     ( Attr(..)
     , AttrStmtType(..)
     , Dot(..)
+    , EdgeRHS(..)
     , EdgeType(..)
     , ID(..)
     , NodeId(..)
     , Stmt(..)
+    , Subgraph(..)
     , parse
     , statement
     , stmtList
@@ -52,8 +54,12 @@ type Stmt
     | AttrStmt AttrStmtType (List Attr)
       -- probably a better name but i don't understand what it does
     | LooseAttr Attr
-    | Subgraph (Maybe ID) (List Stmt)
+    | SubgraphStmt Subgraph
     | Comment String
+
+
+type Subgraph
+    = Subgraph (Maybe ID) (List Stmt)
 
 
 stmtList : Parser (List Stmt)
@@ -87,7 +93,7 @@ statement =
     oneOf
         [ comment
         , attrStmt
-        , subgraph
+        , map SubgraphStmt subgraph
 
         -- TODO: can we refactor to use these original definitions?
         --, edgeStmt
@@ -142,17 +148,25 @@ edgeStmt =
         |= parseWithDefault attrList []
 
 
-type alias EdgeRHS =
-    ( EdgeType, NodeId )
+type EdgeRHS
+    = EdgeNode EdgeType NodeId
+    | EdgeSubgraph EdgeType Subgraph
 
 
 edgeRHS : Parser EdgeRHS
 edgeRHS =
-    -- TODO: edgeRHS can start with a subgraph
-    succeed Tuple.pair
+    succeed identity
         |= edgeOp
         |. spaces
-        |= nodeId
+        |> andThen
+            (\edge ->
+                oneOf
+                    [ succeed (EdgeSubgraph edge)
+                        |= subgraph
+                    , succeed (EdgeNode edge)
+                        |= nodeId
+                    ]
+            )
 
 
 edgeOp : Parser EdgeType
@@ -232,7 +246,7 @@ attr =
         |= id
 
 
-subgraph : Parser Stmt
+subgraph : Parser Subgraph
 subgraph =
     oneOf
         [ succeed Subgraph

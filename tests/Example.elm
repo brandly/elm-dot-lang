@@ -5,10 +5,12 @@ import DotLang
         ( Attr(..)
         , AttrStmtType(..)
         , Dot(..)
+        , EdgeRHS(..)
         , EdgeType(..)
         , ID(..)
         , NodeId(..)
         , Stmt(..)
+        , Subgraph(..)
         , parse
         , statement
         , stmtList
@@ -52,8 +54,9 @@ subgraph =
 suite : Test
 suite =
     let
+        edge : String -> EdgeType -> String -> Stmt
         edge a uh b =
-            EdgeStmt (NodeId (ID a) Nothing) ( uh, NodeId (ID b) Nothing ) [] []
+            EdgeStmt (NodeId (ID a) Nothing) (EdgeNode uh (NodeId (ID b) Nothing)) [] []
     in
     describe "Dot Lang Parser"
         [ test "stmtList" <|
@@ -67,7 +70,7 @@ suite =
                 Expect.equal (Parser.run statement "sup -- dude[dont=care]")
                     (Ok
                         (EdgeStmt (NodeId (ID "sup") Nothing)
-                            ( Graph, NodeId (ID "dude") Nothing )
+                            (EdgeNode Graph (NodeId (ID "dude") Nothing))
                             []
                             [ Attr (ID "dont") (ID "care") ]
                         )
@@ -124,27 +127,27 @@ suite =
                     (Ok
                         (Dot Digraph
                             [ EdgeStmt (NodeId (ID "a") Nothing)
-                                ( Digraph, NodeId (ID "b") Nothing )
+                                (EdgeNode Digraph (NodeId (ID "b") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.2"), Attr (ID "weight") (ID "0.2") ]
                             , EdgeStmt (NodeId (ID "a") Nothing)
-                                ( Digraph, NodeId (ID "c") Nothing )
+                                (EdgeNode Digraph (NodeId (ID "c") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.4"), Attr (ID "weight") (ID "0.4") ]
                             , EdgeStmt (NodeId (ID "c") Nothing)
-                                ( Digraph, NodeId (ID "b") Nothing )
+                                (EdgeNode Digraph (NodeId (ID "b") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.6"), Attr (ID "weight") (ID "0.6") ]
                             , EdgeStmt (NodeId (ID "c") Nothing)
-                                ( Digraph, NodeId (ID "e") Nothing )
+                                (EdgeNode Digraph (NodeId (ID "e") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.6"), Attr (ID "weight") (ID "0.6") ]
                             , EdgeStmt (NodeId (ID "e") Nothing)
-                                ( Digraph, NodeId (ID "e") Nothing )
+                                (EdgeNode Digraph (NodeId (ID "e") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.1"), Attr (ID "weight") (ID "0.1") ]
                             , EdgeStmt (NodeId (ID "e") Nothing)
-                                ( Digraph, NodeId (ID "b") Nothing )
+                                (EdgeNode Digraph (NodeId (ID "b") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.7"), Attr (ID "weight") (ID "0.7") ]
                             ]
@@ -156,23 +159,23 @@ suite =
                     (Ok
                         (Dot Graph
                             [ EdgeStmt (NodeId (ID "a") Nothing)
-                                ( Graph, NodeId (ID "b") Nothing )
+                                (EdgeNode Graph (NodeId (ID "b") Nothing))
                                 []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
                             , edge "b" Graph "c"
                             , EdgeStmt (NodeId (ID "c") Nothing)
-                                ( Graph, NodeId (ID "d") Nothing )
+                                (EdgeNode Graph (NodeId (ID "d") Nothing))
                                 []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
                             , edge "d" Graph "e"
                             , edge "e" Graph "f"
                             , edge "a" Graph "d"
                             , EdgeStmt (NodeId (ID "b") Nothing)
-                                ( Graph, NodeId (ID "d") Nothing )
+                                (EdgeNode Graph (NodeId (ID "d") Nothing))
                                 []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
                             , EdgeStmt (NodeId (ID "c") Nothing)
-                                ( Graph, NodeId (ID "f") Nothing )
+                                (EdgeNode Graph (NodeId (ID "f") Nothing))
                                 []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
                             ]
@@ -184,8 +187,11 @@ suite =
                     (Ok
                         (Dot Graph
                             [ EdgeStmt (NodeId (ID "a") Nothing)
-                                ( Graph, NodeId (ID "b") Nothing )
-                                [ ( Graph, NodeId (ID "d") Nothing ), ( Graph, NodeId (ID "c") Nothing ), ( Graph, NodeId (ID "f") Nothing ) ]
+                                (EdgeNode Graph (NodeId (ID "b") Nothing))
+                                [ EdgeNode Graph (NodeId (ID "d") Nothing)
+                                , EdgeNode Graph (NodeId (ID "c") Nothing)
+                                , EdgeNode Graph (NodeId (ID "f") Nothing)
+                                ]
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
                             , edge "b" Graph "c"
                             , edge "d" Graph "e"
@@ -199,17 +205,46 @@ suite =
                 Expect.equal (parse subgraph)
                     (Ok
                         (Dot Digraph
-                            [ Subgraph (Just (ID "cluster_0"))
-                                [ LooseAttr (Attr (ID "label") (ID "Subgraph A"))
-                                , edge "a" Digraph "b"
-                                , edge "b" Digraph "c"
-                                , edge "c" Digraph "d"
-                                ]
-                            , Subgraph (Just (ID "cluster_1"))
-                                [ LooseAttr (Attr (ID "label") (ID "Subgraph B"))
-                                , edge "a" Digraph "f"
-                                , edge "f" Digraph "c"
-                                ]
+                            [ SubgraphStmt <|
+                                Subgraph (Just (ID "cluster_0"))
+                                    [ LooseAttr (Attr (ID "label") (ID "Subgraph A"))
+                                    , edge "a" Digraph "b"
+                                    , edge "b" Digraph "c"
+                                    , edge "c" Digraph "d"
+                                    ]
+                            , SubgraphStmt <|
+                                Subgraph (Just (ID "cluster_1"))
+                                    [ LooseAttr (Attr (ID "label") (ID "Subgraph B"))
+                                    , edge "a" Digraph "f"
+                                    , edge "f" Digraph "c"
+                                    ]
+                            ]
+                        )
+                    )
+        , test "subgraph edge" <|
+            \_ ->
+                Expect.equal
+                    (parse
+                        (String.join "\n"
+                            [ "graph {"
+                            , "    a -- { b c d };"
+                            , "}"
+                            ]
+                        )
+                    )
+                    (Ok
+                        (Dot Graph
+                            [ EdgeStmt (NodeId (ID "a") Nothing)
+                                (EdgeSubgraph Graph
+                                    (Subgraph Nothing
+                                        [ NodeStmt (NodeId (ID "b") Nothing) []
+                                        , NodeStmt (NodeId (ID "c") Nothing) []
+                                        , NodeStmt (NodeId (ID "d") Nothing) []
+                                        ]
+                                    )
+                                )
+                                []
+                                []
                             ]
                         )
                     )
