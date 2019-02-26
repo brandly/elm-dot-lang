@@ -30,7 +30,7 @@ suite =
     let
         edge : String -> EdgeType -> String -> Stmt
         edge a edgeType b =
-            EdgeStmt (NodeId (ID a) Nothing) (EdgeNode edgeType (NodeId (ID b) Nothing)) [] []
+            EdgeStmtNode (NodeId (ID a) Nothing) (EdgeNode edgeType (NodeId (ID b) Nothing)) [] []
     in
     describe "Dot Lang Parser"
         [ test "stmtList" <|
@@ -43,7 +43,7 @@ suite =
             \_ ->
                 Expect.equal (Parser.run statement "sup -- dude[dont=care]")
                     (Ok
-                        (EdgeStmt (NodeId (ID "sup") Nothing)
+                        (EdgeStmtNode (NodeId (ID "sup") Nothing)
                             (EdgeNode Graph (NodeId (ID "dude") Nothing))
                             []
                             [ Attr (ID "dont") (ID "care") ]
@@ -124,27 +124,27 @@ suite =
                     )
                     (Ok
                         (Dot Digraph
-                            [ EdgeStmt (NodeId (ID "a") Nothing)
+                            [ EdgeStmtNode (NodeId (ID "a") Nothing)
                                 (EdgeNode Digraph (NodeId (ID "b") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.2"), Attr (ID "weight") (ID "0.2") ]
-                            , EdgeStmt (NodeId (ID "a") Nothing)
+                            , EdgeStmtNode (NodeId (ID "a") Nothing)
                                 (EdgeNode Digraph (NodeId (ID "c") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.4"), Attr (ID "weight") (ID "0.4") ]
-                            , EdgeStmt (NodeId (ID "c") Nothing)
+                            , EdgeStmtNode (NodeId (ID "c") Nothing)
                                 (EdgeNode Digraph (NodeId (ID "b") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.6"), Attr (ID "weight") (ID "0.6") ]
-                            , EdgeStmt (NodeId (ID "c") Nothing)
+                            , EdgeStmtNode (NodeId (ID "c") Nothing)
                                 (EdgeNode Digraph (NodeId (ID "e") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.6"), Attr (ID "weight") (ID "0.6") ]
-                            , EdgeStmt (NodeId (ID "e") Nothing)
+                            , EdgeStmtNode (NodeId (ID "e") Nothing)
                                 (EdgeNode Digraph (NodeId (ID "e") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.1"), Attr (ID "weight") (ID "0.1") ]
-                            , EdgeStmt (NodeId (ID "e") Nothing)
+                            , EdgeStmtNode (NodeId (ID "e") Nothing)
                                 (EdgeNode Digraph (NodeId (ID "b") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.7"), Attr (ID "weight") (ID "0.7") ]
@@ -171,23 +171,23 @@ suite =
                     )
                     (Ok
                         (Dot Graph
-                            [ EdgeStmt (NodeId (ID "a") Nothing)
+                            [ EdgeStmtNode (NodeId (ID "a") Nothing)
                                 (EdgeNode Graph (NodeId (ID "b") Nothing))
                                 []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
                             , edge "b" Graph "c"
-                            , EdgeStmt (NodeId (ID "c") Nothing)
+                            , EdgeStmtNode (NodeId (ID "c") Nothing)
                                 (EdgeNode Graph (NodeId (ID "d") Nothing))
                                 []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
                             , edge "d" Graph "e"
                             , edge "e" Graph "f"
                             , edge "a" Graph "d"
-                            , EdgeStmt (NodeId (ID "b") Nothing)
+                            , EdgeStmtNode (NodeId (ID "b") Nothing)
                                 (EdgeNode Graph (NodeId (ID "d") Nothing))
                                 []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
-                            , EdgeStmt (NodeId (ID "c") Nothing)
+                            , EdgeStmtNode (NodeId (ID "c") Nothing)
                                 (EdgeNode Graph (NodeId (ID "f") Nothing))
                                 []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (ID "3") ]
@@ -211,7 +211,7 @@ suite =
                     )
                     (Ok
                         (Dot Graph
-                            [ EdgeStmt (NodeId (ID "a") Nothing)
+                            [ EdgeStmtNode (NodeId (ID "a") Nothing)
                                 (EdgeNode Graph (NodeId (ID "b") Nothing))
                                 [ EdgeNode Graph (NodeId (ID "d") Nothing)
                                 , EdgeNode Graph (NodeId (ID "c") Nothing)
@@ -278,7 +278,7 @@ suite =
                     )
                     (Ok
                         (Dot Graph
-                            [ EdgeStmt (NodeId (ID "a") Nothing)
+                            [ EdgeStmtNode (NodeId (ID "a") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "b") Nothing) []
@@ -327,7 +327,7 @@ suite =
                         (Dot Graph
                             [ LooseAttr (Attr (ID "rankdir") (ID "LR"))
                             , Comment "// Left to Right, instead of Top to Bottom"
-                            , EdgeStmt (NodeId (ID "a") Nothing)
+                            , EdgeStmtNode (NodeId (ID "a") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "b") Nothing) []
@@ -338,7 +338,7 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "b") Nothing)
+                            , EdgeStmtNode (NodeId (ID "b") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "c") Nothing) []
@@ -348,7 +348,7 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "c") Nothing)
+                            , EdgeStmtNode (NodeId (ID "c") Nothing)
                                 (EdgeSubgraph
                                     Graph
                                     (Subgraph Nothing
@@ -359,7 +359,7 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "d") Nothing)
+                            , EdgeStmtNode (NodeId (ID "d") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "f") Nothing) []
@@ -369,11 +369,11 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "e") Nothing)
+                            , EdgeStmtNode (NodeId (ID "e") Nothing)
                                 (EdgeNode Graph (NodeId (ID "h") Nothing))
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "f") Nothing)
+                            , EdgeStmtNode (NodeId (ID "f") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "h") Nothing) []
@@ -385,11 +385,11 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "g") Nothing)
+                            , EdgeStmtNode (NodeId (ID "g") Nothing)
                                 (EdgeNode Graph (NodeId (ID "k") Nothing))
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "h") Nothing)
+                            , EdgeStmtNode (NodeId (ID "h") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "o") Nothing) []
@@ -399,7 +399,7 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "i") Nothing)
+                            , EdgeStmtNode (NodeId (ID "i") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "l") Nothing) []
@@ -410,7 +410,7 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "j") Nothing)
+                            , EdgeStmtNode (NodeId (ID "j") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "m") Nothing) []
@@ -421,7 +421,7 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "k") Nothing)
+                            , EdgeStmtNode (NodeId (ID "k") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "n") Nothing) []
@@ -431,7 +431,7 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "l") Nothing)
+                            , EdgeStmtNode (NodeId (ID "l") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "o") Nothing) []
@@ -441,7 +441,7 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "m") Nothing)
+                            , EdgeStmtNode (NodeId (ID "m") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "o") Nothing) []
@@ -452,7 +452,7 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "n") Nothing)
+                            , EdgeStmtNode (NodeId (ID "n") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "q") Nothing) []
@@ -462,7 +462,7 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "o") Nothing)
+                            , EdgeStmtNode (NodeId (ID "o") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "s") Nothing) []
@@ -472,7 +472,7 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "p") Nothing)
+                            , EdgeStmtNode (NodeId (ID "p") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "s") Nothing) []
@@ -483,7 +483,7 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "q") Nothing)
+                            , EdgeStmtNode (NodeId (ID "q") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "t") Nothing) []
@@ -493,15 +493,15 @@ suite =
                                 )
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "r") Nothing)
+                            , EdgeStmtNode (NodeId (ID "r") Nothing)
                                 (EdgeNode Graph (NodeId (ID "t") Nothing))
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "s") Nothing)
+                            , EdgeStmtNode (NodeId (ID "s") Nothing)
                                 (EdgeNode Graph (NodeId (ID "z") Nothing))
                                 []
                                 []
-                            , EdgeStmt (NodeId (ID "t") Nothing)
+                            , EdgeStmtNode (NodeId (ID "t") Nothing)
                                 (EdgeNode Graph (NodeId (ID "z") Nothing))
                                 []
                                 []
@@ -516,10 +516,30 @@ suite =
                     )
                     (Ok
                         (Dot Graph
-                            [ EdgeStmt (NodeId (ID "a") Nothing)
+                            [ EdgeStmtNode (NodeId (ID "a") Nothing)
                                 (EdgeNode Graph (NodeId (ID "b") Nothing))
                                 []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "business") (ID "good") ]
+                            ]
+                        )
+                    )
+        , test "edge starts with subgraph" <|
+            \_ ->
+                Expect.equal
+                    (parse
+                        (String.join "\n" [ "graph { { a b } -- c\n }" ])
+                    )
+                    (Ok
+                        (Dot Graph
+                            [ EdgeStmtSubgraph
+                                (Subgraph Nothing
+                                    [ NodeStmt (NodeId (ID "a") Nothing) []
+                                    , NodeStmt (NodeId (ID "b") Nothing) []
+                                    ]
+                                )
+                                (EdgeNode Graph (NodeId (ID "c") Nothing))
+                                []
+                                []
                             ]
                         )
                     )

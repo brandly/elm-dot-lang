@@ -50,7 +50,8 @@ edgeType =
 
 type Stmt
     = NodeStmt NodeId (List Attr)
-    | EdgeStmt NodeId EdgeRHS (List EdgeRHS) (List Attr)
+    | EdgeStmtNode NodeId EdgeRHS (List EdgeRHS) (List Attr)
+    | EdgeStmtSubgraph Subgraph EdgeRHS (List EdgeRHS) (List Attr)
     | AttrStmt AttrStmtType (List Attr)
       -- probably a better name but i don't understand what it does
     | LooseAttr Attr
@@ -93,7 +94,22 @@ statement =
     oneOf
         [ comment
         , attrStmt
-        , map SubgraphStmt subgraph
+        , (succeed identity
+            |= subgraph
+            |. spaces
+          )
+            |> andThen
+                (\sg ->
+                    oneOf
+                        [ succeed (EdgeStmtSubgraph sg)
+                            |= edgeRHS
+                            |. spaces
+                            |= repeatingRhs
+                            |. spaces
+                            |= parseWithDefault attrList []
+                        , succeed (SubgraphStmt sg)
+                        ]
+                )
 
         -- TODO: can we refactor to use these original definitions?
         --, edgeStmt
@@ -114,7 +130,7 @@ statement =
                                 |. symbol "="
                                 |. spaces
                                 |= id
-                        , succeed (EdgeStmt (NodeId id_ maybePort))
+                        , succeed (EdgeStmtNode (NodeId id_ maybePort))
                             |= edgeRHS
                             |. spaces
                             |= repeatingRhs
@@ -135,10 +151,9 @@ nodeStmt =
         |= parseWithDefault attrList []
 
 
-edgeStmt : Parser Stmt
-edgeStmt =
-    -- TODO: edgeStmt can start with a subgraph
-    succeed EdgeStmt
+edgeStmtNode : Parser Stmt
+edgeStmtNode =
+    succeed EdgeStmtNode
         |= nodeId
         |. spaces
         |= edgeRHS
