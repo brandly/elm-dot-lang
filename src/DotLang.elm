@@ -239,14 +239,14 @@ attrList =
                     |> map (\_ -> Done (List.reverse revStmts))
                 ]
     in
-    map (\(a, b) -> List.concat [a, b])
-     <| succeed Tuple.pair
-        |. symbol "["
-        |. spaces
-        |= loop [] help
-        |. spaces
-        |. symbol "]"
-        |= lazy (\_ -> parseWithDefault attrList [])
+    map (\( a, b ) -> List.concat [ a, b ]) <|
+        succeed Tuple.pair
+            |. symbol "["
+            |. spaces
+            |= loop [] help
+            |. spaces
+            |. symbol "]"
+            |= lazy (\_ -> parseWithDefault attrList [])
 
 
 attr : Parser Attr

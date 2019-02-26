@@ -1,20 +1,6 @@
 module Example exposing (suite)
 
-import DotLang
-    exposing
-        ( Attr(..)
-        , AttrStmtType(..)
-        , Dot(..)
-        , EdgeRHS(..)
-        , EdgeType(..)
-        , ID(..)
-        , NodeId(..)
-        , Stmt(..)
-        , Subgraph(..)
-        , parse
-        , statement
-        , stmtList
-        )
+import DotLang exposing (..)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Parser
@@ -43,8 +29,8 @@ suite : Test
 suite =
     let
         edge : String -> EdgeType -> String -> Stmt
-        edge a uh b =
-            EdgeStmt (NodeId (ID a) Nothing) (EdgeNode uh (NodeId (ID b) Nothing)) [] []
+        edge a edgeType b =
+            EdgeStmt (NodeId (ID a) Nothing) (EdgeNode edgeType (NodeId (ID b) Nothing)) [] []
     in
     describe "Dot Lang Parser"
         [ test "stmtList" <|
@@ -526,12 +512,13 @@ suite =
             \_ ->
                 Expect.equal
                     (parse
-                        (String.join "\n" ["graph { a -- b[color=red][business=good]\n }"]))
+                        (String.join "\n" [ "graph { a -- b[color=red][business=good]\n }" ])
+                    )
                     (Ok
                         (Dot Graph
                             [ EdgeStmt (NodeId (ID "a") Nothing)
                                 (EdgeNode Graph (NodeId (ID "b") Nothing))
-                                [ ]
+                                []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "business") (ID "good") ]
                             ]
                         )
