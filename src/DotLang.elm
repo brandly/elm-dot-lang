@@ -72,7 +72,7 @@ stmtList =
                     |= statement
                     |. spaces
                     |. oneOf
-                        [ chompIf ((==) ';')
+                        [ symbol ";"
                         , symbol ""
                         ]
                     |. spaces
@@ -224,16 +224,29 @@ attrList : Parser (List Attr)
 attrList =
     -- TODO: trailing attr_list?
     -- attr_list : '[' [ a_list ] ']' [ attr_list ]
-    sequence
-        { start = "["
-
-        -- TODO: comma OR semi
-        , separator = ","
-        , end = "]"
-        , spaces = spaces
-        , item = attr
-        , trailing = Optional
-        }
+    let
+        help : List Attr -> Parser (Step (List Attr) (List Attr))
+        help revStmts =
+            oneOf
+                [ succeed (\stmt -> Loop (stmt :: revStmts))
+                    |= attr
+                    |. spaces
+                    |. oneOf
+                        [ symbol ";"
+                        , symbol ","
+                        , symbol ""
+                        ]
+                    |. spaces
+                , succeed ()
+                    |> map (\_ -> Done (List.reverse revStmts))
+                ]
+    in
+    succeed identity
+        |. symbol "["
+        |. spaces
+        |= loop [] help
+        |. spaces
+        |. symbol "]"
 
 
 attr : Parser Attr
