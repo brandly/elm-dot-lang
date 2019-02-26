@@ -39,55 +39,6 @@ simpleGraph =
         ]
 
 
-showingPath : String
-showingPath =
-    String.join "\n"
-        [ "graph {"
-        , "    a -- b[color=red,penwidth=3.0];"
-        , "    b -- c;"
-        , "    c -- d[color=red,penwidth=3.0];"
-        , "    d -- e;"
-        , "    e -- f;"
-        , "    a -- d;"
-        , "    b -- d[color=red,penwidth=3.0];"
-        , "    c -- f[color=red,penwidth=3.0];"
-        , "}"
-        ]
-
-
-showingPathShortHand : String
-showingPathShortHand =
-    String.join "\n"
-        [ "graph {"
-        , "    a -- b -- d -- c -- f[color=red,penwidth=3.0];"
-        , "    b -- c;"
-        , "    d -- e;"
-        , "    e -- f;"
-        , "    a -- d;"
-        , "}"
-        ]
-
-
-subgraph : String
-subgraph =
-    String.join "\n"
-        [ "digraph {"
-        , "    subgraph cluster_0 {"
-        , "        label=\"Subgraph A\";"
-        , "        a -> b;"
-        , "        b -> c;"
-        , "        c -> d;"
-        , "    }"
-        , "    subgraph cluster_1 {"
-        , "        label=\"Subgraph B\";"
-        , "        a -> f;"
-        , "        f -> c;"
-        , "    }"
-        , "}"
-        , "    "
-        ]
-
-
 suite : Test
 suite =
     let
@@ -216,7 +167,22 @@ suite =
                     )
         , test "parsing 'showing a path'" <|
             \_ ->
-                Expect.equal (parse showingPath)
+                Expect.equal
+                    (parse
+                        (String.join "\n"
+                            [ "graph {"
+                            , "    a -- b[color=red,penwidth=3.0];"
+                            , "    b -- c;"
+                            , "    c -- d[color=red,penwidth=3.0];"
+                            , "    d -- e;"
+                            , "    e -- f;"
+                            , "    a -- d;"
+                            , "    b -- d[color=red,penwidth=3.0];"
+                            , "    c -- f[color=red,penwidth=3.0];"
+                            , "}"
+                            ]
+                        )
+                    )
                     (Ok
                         (Dot Graph
                             [ EdgeStmt (NodeId (ID "a") Nothing)
@@ -244,7 +210,19 @@ suite =
                     )
         , test "parsing 'showing a path' shorthand" <|
             \_ ->
-                Expect.equal (parse showingPathShortHand)
+                Expect.equal
+                    (parse
+                        (String.join "\n"
+                            [ "graph {"
+                            , "    a -- b -- d -- c -- f[color=red,penwidth=3.0];"
+                            , "    b -- c;"
+                            , "    d -- e;"
+                            , "    e -- f;"
+                            , "    a -- d;"
+                            , "}"
+                            ]
+                        )
+                    )
                     (Ok
                         (Dot Graph
                             [ EdgeStmt (NodeId (ID "a") Nothing)
@@ -263,7 +241,26 @@ suite =
                     )
         , test "parsing subgraph" <|
             \_ ->
-                Expect.equal (parse subgraph)
+                Expect.equal
+                    (parse
+                        (String.join "\n"
+                            [ "digraph {"
+                            , "    subgraph cluster_0 {"
+                            , "        label=\"Subgraph A\";"
+                            , "        a -> b;"
+                            , "        b -> c;"
+                            , "        c -> d;"
+                            , "    }"
+                            , "    subgraph cluster_1 {"
+                            , "        label=\"Subgraph B\";"
+                            , "        a -> f;"
+                            , "        f -> c;"
+                            , "    }"
+                            , "}"
+                            , "    "
+                            ]
+                        )
+                    )
                     (Ok
                         (Dot Digraph
                             [ SubgraphStmt <|
