@@ -60,6 +60,7 @@ suite =
                 Expect.equal (parse simpleGraph)
                     (Ok
                         (Dot Graph
+                            Nothing
                             [ edge "a" Graph "b"
                             , edge "b" Graph "c"
                             , edge "a" Graph "c"
@@ -74,6 +75,7 @@ suite =
                 Expect.equal (parse (String.filter (\c -> c /= ';') simpleGraph))
                     (Ok
                         (Dot Graph
+                            Nothing
                             [ edge "a" Graph "b"
                             , edge "b" Graph "c"
                             , edge "a" Graph "c"
@@ -99,6 +101,7 @@ suite =
                     )
                     (Ok
                         (Dot Digraph
+                            Nothing
                             [ edge "a" Digraph "b"
                             , edge "b" Digraph "c"
                             , edge "c" Digraph "d"
@@ -124,6 +127,7 @@ suite =
                     )
                     (Ok
                         (Dot Digraph
+                            Nothing
                             [ EdgeStmtNode (NodeId (ID "a") Nothing)
                                 (EdgeNode Digraph (NodeId (ID "b") Nothing))
                                 []
@@ -171,6 +175,7 @@ suite =
                     )
                     (Ok
                         (Dot Graph
+                            Nothing
                             [ EdgeStmtNode (NodeId (ID "a") Nothing)
                                 (EdgeNode Graph (NodeId (ID "b") Nothing))
                                 []
@@ -211,6 +216,7 @@ suite =
                     )
                     (Ok
                         (Dot Graph
+                            Nothing
                             [ EdgeStmtNode (NodeId (ID "a") Nothing)
                                 (EdgeNode Graph (NodeId (ID "b") Nothing))
                                 [ EdgeNode Graph (NodeId (ID "d") Nothing)
@@ -249,6 +255,7 @@ suite =
                     )
                     (Ok
                         (Dot Digraph
+                            Nothing
                             [ SubgraphStmt <|
                                 Subgraph (Just (ID "cluster_0"))
                                     [ LooseAttr (Attr (ID "label") (ID "Subgraph A"))
@@ -278,6 +285,7 @@ suite =
                     )
                     (Ok
                         (Dot Graph
+                            Nothing
                             [ EdgeStmtNode (NodeId (ID "a") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
@@ -325,6 +333,7 @@ suite =
                     )
                     (Ok
                         (Dot Graph
+                            Nothing
                             [ LooseAttr (Attr (ID "rankdir") (ID "LR"))
                             , Comment "// Left to Right, instead of Top to Bottom"
                             , EdgeStmtNode (NodeId (ID "a") Nothing)
@@ -516,6 +525,7 @@ suite =
                     )
                     (Ok
                         (Dot Graph
+                            Nothing
                             [ EdgeStmtNode (NodeId (ID "a") Nothing)
                                 (EdgeNode Graph (NodeId (ID "b") Nothing))
                                 []
@@ -531,6 +541,7 @@ suite =
                     )
                     (Ok
                         (Dot Graph
+                            Nothing
                             [ EdgeStmtSubgraph
                                 (Subgraph Nothing
                                     [ NodeStmt (NodeId (ID "a") Nothing) []
@@ -541,6 +552,18 @@ suite =
                                 []
                                 []
                             ]
+                        )
+                    )
+        , test "graph has id" <|
+            \_ ->
+                Expect.equal
+                    (parse
+                        (String.join "\n" [ "graph world { a -- b }" ])
+                    )
+                    (Ok
+                        (Dot Graph
+                            (Just (ID "world"))
+                            [ edge "a" Graph "b" ]
                         )
                     )
         ]

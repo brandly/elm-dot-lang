@@ -24,13 +24,15 @@ parse =
 
 
 type Dot
-    = Dot EdgeType (List Stmt)
+    = Dot EdgeType (Maybe ID) (List Stmt)
 
 
 dot : Parser Dot
 dot =
     succeed Dot
         |= edgeType
+        |. spaces
+        |= maybeParse id
         |. spaces
         |= stmtList
 
