@@ -99,31 +99,31 @@ statement =
         --, edgeStmt
         --, nodeStmt
         --, map LooseAttr attr
-        , andThen
-            (\( id_, maybePort ) ->
-                oneOf
-                    [ -- TODO: we should only consider LooseAttr if maybePort == Nothing
-                      map LooseAttr <|
-                        succeed (Attr id_)
-                            |. symbol "="
+        , (succeed Tuple.pair
+            |= id
+            |. spaces
+            |= maybeParse port_
+            |. spaces
+          )
+            |> andThen
+                (\( id_, maybePort ) ->
+                    oneOf
+                        [ -- TODO: we should only consider LooseAttr if maybePort == Nothing
+                          map LooseAttr <|
+                            succeed (Attr id_)
+                                |. symbol "="
+                                |. spaces
+                                |= id
+                        , succeed (EdgeStmt (NodeId id_ maybePort))
+                            |= edgeRHS
                             |. spaces
-                            |= id
-                    , succeed (EdgeStmt (NodeId id_ maybePort))
-                        |= edgeRHS
-                        |. spaces
-                        |= repeatingRhs
-                        |. spaces
-                        |= parseWithDefault attrList []
-                    , succeed (NodeStmt (NodeId id_ maybePort))
-                        |= parseWithDefault attrList []
-                    ]
-            )
-            (succeed Tuple.pair
-                |= id
-                |. spaces
-                |= maybeParse port_
-                |. spaces
-            )
+                            |= repeatingRhs
+                            |. spaces
+                            |= parseWithDefault attrList []
+                        , succeed (NodeStmt (NodeId id_ maybePort))
+                            |= parseWithDefault attrList []
+                        ]
+                )
         ]
 
 
