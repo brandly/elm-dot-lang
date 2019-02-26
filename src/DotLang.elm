@@ -222,8 +222,6 @@ type Attr
 
 attrList : Parser (List Attr)
 attrList =
-    -- TODO: trailing attr_list?
-    -- attr_list : '[' [ a_list ] ']' [ attr_list ]
     let
         help : List Attr -> Parser (Step (List Attr) (List Attr))
         help revStmts =
@@ -241,12 +239,14 @@ attrList =
                     |> map (\_ -> Done (List.reverse revStmts))
                 ]
     in
-    succeed identity
+    map (\(a, b) -> List.concat [a, b])
+     <| succeed Tuple.pair
         |. symbol "["
         |. spaces
         |= loop [] help
         |. spaces
         |. symbol "]"
+        |= lazy (\_ -> parseWithDefault attrList [])
 
 
 attr : Parser Attr

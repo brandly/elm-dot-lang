@@ -522,4 +522,18 @@ suite =
                             ]
                         )
                     )
+        , test "repeating attr list" <|
+            \_ ->
+                Expect.equal
+                    (parse
+                        (String.join "\n" ["graph { a -- b[color=red][business=good]\n }"]))
+                    (Ok
+                        (Dot Graph
+                            [ EdgeStmt (NodeId (ID "a") Nothing)
+                                (EdgeNode Graph (NodeId (ID "b") Nothing))
+                                [ ]
+                                [ Attr (ID "color") (ID "red"), Attr (ID "business") (ID "good") ]
+                            ]
+                        )
+                    )
         ]
