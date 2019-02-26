@@ -374,13 +374,12 @@ compassPt =
 
 comment : Parser Stmt
 comment =
-    -- TODO: a line beginning with a '#' character is considered a line output
-    -- from a C preprocessor (e.g., # 34 to indicate line 34 ) and discarded.
     map Comment <|
         getChompedString <|
             oneOf
                 [ lineComment "//"
                 , multiComment "/*" "*/" NotNestable
+                , lineComment "#"
                 ]
 
 
