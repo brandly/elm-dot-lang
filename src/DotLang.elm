@@ -30,10 +30,11 @@ type Dot
 dot : Parser Dot
 dot =
     succeed Dot
+        |. spacing
         |= edgeType
-        |. spaces
+        |. spacing
         |= maybeParse id
-        |. spaces
+        |. spacing
         |= stmtList
 
 
@@ -58,7 +59,6 @@ type Stmt
       -- probably a better name but i don't understand what it does
     | LooseAttr Attr
     | SubgraphStmt Subgraph
-    | Comment String
 
 
 type Subgraph
@@ -73,41 +73,40 @@ stmtList =
             oneOf
                 [ succeed (\stmt -> Loop (stmt :: revStmts))
                     |= statement
-                    |. spaces
+                    |. spacing
                     |. oneOf
                         [ symbol ";"
                         , symbol ""
                         ]
-                    |. spaces
+                    |. spacing
                 , succeed ()
                     |> map (\_ -> Done (List.reverse revStmts))
                 ]
     in
     succeed identity
         |. symbol "{"
-        |. spaces
+        |. spacing
         |= loop [] help
-        |. spaces
+        |. spacing
         |. symbol "}"
 
 
 statement : Parser Stmt
 statement =
     oneOf
-        [ comment
-        , attrStmt
+        [ attrStmt
         , (succeed identity
             |= subgraph
-            |. spaces
+            |. spacing
           )
             |> andThen
                 (\sg ->
                     oneOf
                         [ succeed (EdgeStmtSubgraph sg)
                             |= edgeRHS
-                            |. spaces
+                            |. spacing
                             |= repeatingRhs
-                            |. spaces
+                            |. spacing
                             |= parseWithDefault attrList []
                         , succeed (SubgraphStmt sg)
                         ]
@@ -119,9 +118,9 @@ statement =
         --, map LooseAttr attr
         , (succeed Tuple.pair
             |= id
-            |. spaces
+            |. spacing
             |= maybeParse port_
-            |. spaces
+            |. spacing
           )
             |> andThen
                 (\( id_, maybePort ) ->
@@ -130,13 +129,13 @@ statement =
                           map LooseAttr <|
                             succeed (Attr id_)
                                 |. symbol "="
-                                |. spaces
+                                |. spacing
                                 |= id
                         , succeed (EdgeStmtNode (NodeId id_ maybePort))
                             |= edgeRHS
-                            |. spaces
+                            |. spacing
                             |= repeatingRhs
-                            |. spaces
+                            |. spacing
                             |= parseWithDefault attrList []
                         , succeed (NodeStmt (NodeId id_ maybePort))
                             |= parseWithDefault attrList []
@@ -149,7 +148,7 @@ nodeStmt : Parser Stmt
 nodeStmt =
     succeed NodeStmt
         |= nodeId
-        |. spaces
+        |. spacing
         |= parseWithDefault attrList []
 
 
@@ -157,11 +156,11 @@ edgeStmtNode : Parser Stmt
 edgeStmtNode =
     succeed EdgeStmtNode
         |= nodeId
-        |. spaces
+        |. spacing
         |= edgeRHS
-        |. spaces
+        |. spacing
         |= repeatingRhs
-        |. spaces
+        |. spacing
         |= parseWithDefault attrList []
 
 
@@ -174,7 +173,7 @@ edgeRHS : Parser EdgeRHS
 edgeRHS =
     succeed identity
         |= edgeOp
-        |. spaces
+        |. spacing
         |> andThen
             (\edge ->
                 oneOf
@@ -202,7 +201,7 @@ repeatingRhs =
             oneOf
                 [ succeed (\stmt -> Loop (stmt :: revStmts))
                     |= edgeRHS
-                    |. spaces
+                    |. spacing
                 , succeed ()
                     |> map (\_ -> Done (List.reverse revStmts))
                 ]
@@ -229,7 +228,7 @@ attrStmt : Parser Stmt
 attrStmt =
     succeed AttrStmt
         |= attrStmtType
-        |. spaces
+        |. spacing
         |= attrList
 
 
@@ -245,13 +244,13 @@ attrList =
             oneOf
                 [ succeed (\stmt -> Loop (stmt :: revStmts))
                     |= attr
-                    |. spaces
+                    |. spacing
                     |. oneOf
                         [ symbol ";"
                         , symbol ","
                         , symbol ""
                         ]
-                    |. spaces
+                    |. spacing
                 , succeed ()
                     |> map (\_ -> Done (List.reverse revStmts))
                 ]
@@ -259,9 +258,9 @@ attrList =
     map (\( a, b ) -> List.concat [ a, b ]) <|
         succeed Tuple.pair
             |. symbol "["
-            |. spaces
+            |. spacing
             |= loop [] help
-            |. spaces
+            |. spacing
             |. symbol "]"
             |= lazy (\_ -> parseWithDefault attrList [])
 
@@ -270,9 +269,9 @@ attr : Parser Attr
 attr =
     succeed Attr
         |= id
-        |. spaces
+        |. spacing
         |. symbol "="
-        |. spaces
+        |. spacing
         |= id
 
 
@@ -281,12 +280,12 @@ subgraph =
     oneOf
         [ succeed Subgraph
             |. symbol "subgraph"
-            |. spaces
+            |. spacing
             |= maybeParse id
-            |. spaces
+            |. spacing
             |= stmtList
         , succeed (Subgraph Nothing)
-            |. spaces
+            |. spacing
             |= stmtList
         ]
 
@@ -299,7 +298,7 @@ nodeId : Parser NodeId
 nodeId =
     succeed NodeId
         |= id
-        |. spaces
+        |. spacing
         |= maybeParse port_
 
 
@@ -332,13 +331,13 @@ port_ =
     oneOf
         [ succeed PortPt
             |. symbol ":"
-            |. spaces
+            |. spacing
             |= compassPt
         , succeed PortId
             |. symbol ":"
-            |. spaces
+            |. spacing
             |= id
-            |. spaces
+            |. spacing
             |= maybeParse compassPt
         ]
 
@@ -372,15 +371,45 @@ compassPt =
         ]
 
 
-comment : Parser Stmt
+comment : Parser ()
 comment =
-    map Comment <|
-        getChompedString <|
+    oneOf
+        [ lineComment "//"
+        , multiComment "/*" "*/" NotNestable
+        , lineComment "#"
+        ]
+
+
+spacing : Parser ()
+spacing =
+    let
+        isSpace =
+            \c -> c == ' ' || c == '\n' || c == '\u{000D}'
+    in
+    succeed ()
+        |. (repeat <|
+                oneOf
+                    [ succeed ()
+                        |. chompIf isSpace
+                        |. chompWhile isSpace
+                    , comment
+                    ]
+           )
+
+
+repeat : Parser a -> Parser (List a)
+repeat parser_ =
+    let
+        help : List a -> Parser (Step (List a) (List a))
+        help revStmts =
             oneOf
-                [ lineComment "//"
-                , multiComment "/*" "*/" NotNestable
-                , lineComment "#"
+                [ succeed (\stmt -> Loop (stmt :: revStmts))
+                    |= parser_
+                , succeed ()
+                    |> map (\_ -> Done (List.reverse revStmts))
                 ]
+    in
+    loop [] help
 
 
 symbolToType : List ( String, a ) -> Parser a

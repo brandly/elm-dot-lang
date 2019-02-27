@@ -85,6 +85,21 @@ suite =
                             ]
                         )
                     )
+        , test "can start with comments" <|
+            \_ ->
+                Expect.equal (parse ("## This is a comment\n\n// Here's another\n\n" ++ simpleGraph))
+                    (Ok
+                        (Dot Graph
+                            Nothing
+                            [ edge "a" Graph "b"
+                            , edge "b" Graph "c"
+                            , edge "a" Graph "c"
+                            , edge "d" Graph "c"
+                            , edge "e" Graph "c"
+                            , edge "e" Graph "a"
+                            ]
+                        )
+                    )
         , test "parsing simple digraph" <|
             \_ ->
                 Expect.equal
@@ -335,7 +350,6 @@ suite =
                         (Dot Graph
                             Nothing
                             [ LooseAttr (Attr (ID "rankdir") (ID "LR"))
-                            , Comment "// Left to Right, instead of Top to Bottom"
                             , EdgeStmtNode (NodeId (ID "a") Nothing)
                                 (EdgeSubgraph Graph
                                     (Subgraph Nothing
