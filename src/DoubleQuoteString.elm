@@ -1,8 +1,6 @@
 module DoubleQuoteString exposing (string)
 
-import Browser
 import Char
-import Html
 import Parser exposing (..)
 
 
