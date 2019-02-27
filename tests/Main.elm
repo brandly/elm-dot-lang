@@ -1,4 +1,4 @@
-module Example exposing (suite)
+module Main exposing (suite)
 
 import DotLang exposing (..)
 import Expect exposing (Expectation)
