@@ -14,6 +14,7 @@ module DotLang exposing
     )
 
 import DoubleQuoteString as DQS
+import Html.Parser exposing (Node(..), node)
 import Parser exposing (..)
 import Set
 
@@ -304,21 +305,28 @@ nodeId =
 
 type ID
     = ID String
+    | HtmlID Node
 
 
 id : Parser ID
 id =
-    map ID <|
-        -- TODO: HTML
-        oneOf
-            [ DQS.string
-            , variable
-                { start = \c -> Char.isAlpha c || c == '_'
-                , inner = \c -> Char.isAlphaNum c || c == '_'
-                , reserved = Set.fromList []
-                }
-            , map String.fromFloat float
-            ]
+    oneOf
+        [ map ID <|
+            oneOf
+                [ DQS.string
+                , variable
+                    { start = \c -> Char.isAlpha c || c == '_'
+                    , inner = \c -> Char.isAlphaNum c || c == '_'
+                    , reserved = Set.fromList []
+                    }
+                , map String.fromFloat float
+                ]
+        , map HtmlID <|
+            succeed identity
+                |. symbol "<"
+                |= node
+                |. symbol ">"
+        ]
 
 
 type Port
