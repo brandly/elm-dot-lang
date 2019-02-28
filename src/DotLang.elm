@@ -8,9 +8,8 @@ module DotLang exposing
     , NodeId(..)
     , Stmt(..)
     , Subgraph(..)
-    , parse
-    , statement
-    , stmtList
+    , dot
+    , fromString
     )
 
 import DoubleQuoteString as DQS
@@ -19,8 +18,8 @@ import Parser exposing (..)
 import Set
 
 
-parse : String -> Result (List Parser.DeadEnd) Dot
-parse =
+fromString : String -> Result (List Parser.DeadEnd) Dot
+fromString =
     Parser.run dot
 
 

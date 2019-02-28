@@ -40,31 +40,9 @@ suite =
             EdgeStmtNode (NodeId (ID a) Nothing) (EdgeNode edgeType (NodeId (ID b) Nothing)) [] []
     in
     describe "Dot Lang Parser"
-        [ test "stmtList" <|
+        [ test "parsing simple graph" <|
             \_ ->
-                Expect.equal (Parser.run stmtList "{}") (Ok [])
-        , test "statement" <|
-            \_ ->
-                Expect.equal (Parser.run statement "sup -- dude;dont -- care") (Ok (edge "sup" Graph "dude"))
-        , test "statement with attrs" <|
-            \_ ->
-                Expect.equal (Parser.run statement "sup -- dude[dont=care]")
-                    (Ok
-                        (EdgeStmtNode (NodeId (ID "sup") Nothing)
-                            (EdgeNode Graph (NodeId (ID "dude") Nothing))
-                            []
-                            [ Attr (ID "dont") (ID "care") ]
-                        )
-                    )
-        , test "attr_stmt" <|
-            \_ ->
-                Expect.equal (Parser.run statement "graph [hm=yeah]")
-                    (Ok
-                        (AttrStmt AttrGraph [ Attr (ID "hm") (ID "yeah") ])
-                    )
-        , test "parsing simple graph" <|
-            \_ ->
-                Expect.equal (parse simpleGraph)
+                Expect.equal (fromString simpleGraph)
                     (Ok
                         (Dot Graph
                             Nothing
@@ -79,7 +57,7 @@ suite =
                     )
         , test "don't need semicolons" <|
             \_ ->
-                Expect.equal (parse (String.filter (\c -> c /= ';') simpleGraph))
+                Expect.equal (fromString (String.filter (\c -> c /= ';') simpleGraph))
                     (Ok
                         (Dot Graph
                             Nothing
@@ -94,7 +72,7 @@ suite =
                     )
         , test "can start with comments" <|
             \_ ->
-                Expect.equal (parse ("## This is a comment\n\n// Here's another\n\n" ++ simpleGraph))
+                Expect.equal (fromString ("## This is a comment\n\n// Here's another\n\n" ++ simpleGraph))
                     (Ok
                         (Dot Graph
                             Nothing
@@ -110,7 +88,7 @@ suite =
         , test "parsing simple digraph" <|
             \_ ->
                 Expect.equal
-                    (parse
+                    (fromString
                         (String.join "\n"
                             [ "digraph {"
                             , "    a -> b;"
@@ -134,7 +112,7 @@ suite =
         , test "parsing full digraph" <|
             \_ ->
                 Expect.equal
-                    (parse
+                    (fromString
                         (String.join "\n"
                             [ "digraph {"
                             , "    a -> b[label=\"0.2\",weight=\"0.2\"];"
@@ -180,7 +158,7 @@ suite =
         , test "parsing 'showing a path'" <|
             \_ ->
                 Expect.equal
-                    (parse
+                    (fromString
                         (String.join "\n"
                             [ "graph {"
                             , "    a -- b[color=red,penwidth=3.0];"
@@ -224,7 +202,7 @@ suite =
         , test "parsing 'showing a path' shorthand" <|
             \_ ->
                 Expect.equal
-                    (parse
+                    (fromString
                         (String.join "\n"
                             [ "graph {"
                             , "    a -- b -- d -- c -- f[color=red,penwidth=3.0];"
@@ -256,7 +234,7 @@ suite =
         , test "parsing subgraph" <|
             \_ ->
                 Expect.equal
-                    (parse
+                    (fromString
                         (String.join "\n"
                             [ "digraph {"
                             , "    subgraph cluster_0 {"
@@ -297,7 +275,7 @@ suite =
         , test "subgraph edge" <|
             \_ ->
                 Expect.equal
-                    (parse
+                    (fromString
                         (String.join "\n"
                             [ "graph {"
                             , "    a -- { b c d };"
@@ -325,7 +303,7 @@ suite =
         , test "large graph" <|
             \_ ->
                 Expect.equal
-                    (parse
+                    (fromString
                         (String.join "\n"
                             [ "graph {"
                             , "    rankdir=LR; // Left to Right, instead of Top to Bottom"
@@ -541,7 +519,7 @@ suite =
         , test "repeating attr list" <|
             \_ ->
                 Expect.equal
-                    (parse
+                    (fromString
                         (String.join "\n" [ "graph { a -- b[color=red][business=good]\n }" ])
                     )
                     (Ok
@@ -557,7 +535,7 @@ suite =
         , test "edge starts with subgraph" <|
             \_ ->
                 Expect.equal
-                    (parse
+                    (fromString
                         (String.join "\n" [ "graph { { a b } -- c\n }" ])
                     )
                     (Ok
@@ -578,7 +556,7 @@ suite =
         , test "graph has id" <|
             \_ ->
                 Expect.equal
-                    (parse
+                    (fromString
                         (String.join "\n" [ "graph world { a -- b }" ])
                     )
                     (Ok
@@ -589,7 +567,7 @@ suite =
                     )
         , test "psg" <|
             \_ ->
-                Expect.equal (parse psg)
+                Expect.equal (fromString psg)
                     (Ok
                         (Dot
                             Digraph

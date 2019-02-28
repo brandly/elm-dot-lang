@@ -3,6 +3,6 @@
 ```elm
 import DotLang
 
-DotLang.parse "graph { a -- b }"
+DotLang.fromString "graph { a -- b }"
 -- => Ok (Dot Graph Nothing [EdgeStmtNode (NodeId (ID "a") Nothing) (EdgeNode Graph (NodeId (ID "b") Nothing)) [] []])
 ```
