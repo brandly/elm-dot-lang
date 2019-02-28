@@ -1,6 +1,6 @@
 # dot-lang [![Build Status](https://travis-ci.org/brandly/elm-dot-lang.svg?branch=master)](https://travis-ci.org/brandly/elm-dot-lang)
 
-```
+```elm
 import DotLang
 
 DotLang.parse "graph { a -- b }"
