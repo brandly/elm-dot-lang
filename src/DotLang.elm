@@ -336,18 +336,17 @@ type Port
 
 port_ : Parser Port
 port_ =
-    oneOf
-        [ succeed PortPt
-            |. symbol ":"
-            |. spacing
-            |= compassPt
-        , succeed PortId
-            |. symbol ":"
-            |. spacing
-            |= id
-            |. spacing
-            |= maybeParse compassPt
-        ]
+    succeed identity
+        |. symbol ":"
+        |. spacing
+        |= oneOf
+            [ succeed PortPt
+                |= compassPt
+            , succeed PortId
+                |= id
+                |. spacing
+                |= maybeParse compassPt
+            ]
 
 
 type CompassPt
