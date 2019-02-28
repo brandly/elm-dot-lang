@@ -306,6 +306,7 @@ nodeId =
 type ID
     = ID String
     | HtmlID Node
+    | NumeralID Float
 
 
 id : Parser ID
@@ -319,8 +320,8 @@ id =
                     , inner = \c -> Char.isAlphaNum c || c == '_'
                     , reserved = Set.fromList []
                     }
-                , map String.fromFloat float
                 ]
+        , map NumeralID float
         , map HtmlID <|
             succeed identity
                 |. symbol "<"
