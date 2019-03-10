@@ -76,7 +76,7 @@ stmtList =
                     |. spacing
                     |. oneOf
                         [ symbol ";"
-                        , symbol ""
+                        , succeed ()
                         ]
                     |. spacing
                 , succeed ()
@@ -248,7 +248,7 @@ attrList =
                     |. oneOf
                         [ symbol ";"
                         , symbol ","
-                        , symbol ""
+                        , succeed ()
                         ]
                     |. spacing
                 , succeed ()
@@ -431,9 +431,7 @@ parseWithDefault : Parser a -> a -> Parser a
 parseWithDefault parser default =
     oneOf
         [ parser
-        , map (\_ -> default) <|
-            succeed ()
-                |. chompWhile (\_ -> False)
+        , succeed default
         ]
 
 
@@ -441,7 +439,5 @@ maybeParse : Parser a -> Parser (Maybe a)
 maybeParse parser =
     oneOf
         [ map Just parser
-        , map (\_ -> Nothing) <|
-            succeed ()
-                |. chompWhile (\_ -> False)
+        , succeed Nothing
         ]
