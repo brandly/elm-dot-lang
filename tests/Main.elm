@@ -109,6 +109,24 @@ suite =
                             ]
                         )
                     )
+        , test "graph with id" <|
+            \_ ->
+                Expect.equal
+                    (fromString
+                        (String.join "\n"
+                            [ "digraph hello {"
+                            , "    a -> b;"
+                            , "}"
+                            ]
+                        )
+                    )
+                    (Ok
+                        (Dot Digraph
+                            (Just (ID "hello"))
+                            [ edge "a" Digraph "b"
+                            ]
+                        )
+                    )
         , test "parsing full digraph" <|
             \_ ->
                 Expect.equal
