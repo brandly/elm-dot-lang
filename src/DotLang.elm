@@ -111,11 +111,6 @@ statement =
                         , succeed (SubgraphStmt sg)
                         ]
                 )
-
-        -- TODO: can we refactor to use these original definitions?
-        --, edgeStmt
-        --, nodeStmt
-        --, map LooseAttr attr
         , (succeed Tuple.pair
             |= id
             |. spacing
@@ -124,22 +119,38 @@ statement =
           )
             |> andThen
                 (\( id_, maybePort ) ->
-                    oneOf
-                        [ -- TODO: we should only consider LooseAttr if maybePort == Nothing
-                          map LooseAttr <|
-                            succeed (Attr id_)
-                                |. symbol "="
+                    let
+                        loose =
+                            map LooseAttr <|
+                                succeed (Attr id_)
+                                    |. symbol "="
+                                    |. spacing
+                                    |= id
+
+                        edge =
+                            succeed (EdgeStmtNode (NodeId id_ maybePort))
+                                |= edgeRHS
                                 |. spacing
-                                |= id
-                        , succeed (EdgeStmtNode (NodeId id_ maybePort))
-                            |= edgeRHS
-                            |. spacing
-                            |= repeatingRhs
-                            |. spacing
-                            |= parseWithDefault attrList []
-                        , succeed (NodeStmt (NodeId id_ maybePort))
-                            |= parseWithDefault attrList []
-                        ]
+                                |= repeatingRhs
+                                |. spacing
+                                |= parseWithDefault attrList []
+
+                        node =
+                            succeed (NodeStmt (NodeId id_ maybePort))
+                                |= parseWithDefault attrList []
+                    in
+                    if maybePort == Nothing then
+                        oneOf
+                            [ loose
+                            , edge
+                            , node
+                            ]
+
+                    else
+                        oneOf
+                            [ edge
+                            , node
+                            ]
                 )
         ]
 
@@ -321,11 +332,10 @@ id =
                     }
                 ]
         , map NumeralID float
-        , map HtmlID <|
-            succeed identity
-                |. symbol "<"
-                |= node
-                |. symbol ">"
+        , succeed HtmlID
+            |. symbol "<"
+            |= node
+            |. symbol ">"
         ]
 
 
@@ -405,13 +415,13 @@ spacing =
 
 
 repeat : Parser a -> Parser (List a)
-repeat parser_ =
+repeat parser =
     let
         help : List a -> Parser (Step (List a) (List a))
         help revStmts =
             oneOf
                 [ succeed (\stmt -> Loop (stmt :: revStmts))
-                    |= parser_
+                    |= parser
                 , succeed ()
                     |> map (\_ -> Done (List.reverse revStmts))
                 ]
