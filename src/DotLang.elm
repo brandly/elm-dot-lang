@@ -18,11 +18,27 @@ import Parser exposing (..)
 import Set
 
 
+{-| Parse DOT Language in Elm.
+Take a look at the grammar <https://www.graphviz.org/doc/info/lang.html>
+
+@docs fromString, Dot
+
+-}
+
+
+{-| Parse a DOT string.
+
+    fromString "graph {}" == Dot Graph Nothing []
+
+-}
 fromString : String -> Result (List Parser.DeadEnd) Dot
 fromString =
     Parser.run dot
 
 
+{-| A DOT file. Either a `graph` or `digraph` is represented. It might have
+an `ID`. `Stmt`s describe the graph's properties, including vertices and edges.
+-}
 type Dot
     = Dot EdgeType (Maybe ID) (List Stmt)
 
@@ -38,6 +54,10 @@ dot =
         |= stmtList
 
 
+{-| A DOT file representing an undirected graph starts with `graph` and edges
+are described with `--`. A directed graph starts with `digraph` and uses `->`
+for its edges.
+-}
 type EdgeType
     = Graph
     | Digraph
