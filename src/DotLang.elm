@@ -1,20 +1,29 @@
 module DotLang exposing
-    ( Attr(..)
-    , AttrStmtType(..)
-    , Dot(..)
-    , EdgeRHS(..)
-    , EdgeType(..)
-    , ID(..)
-    , NodeId(..)
-    , Stmt(..)
-    , Subgraph(..)
+    ( fromString, Dot(..)
+    , EdgeType(..), ID(..), Stmt(..)
+    , NodeId(..), Attr(..), AttrStmtType(..), EdgeRHS(..), Subgraph(..)
     , dot
-    , fromString
     )
+
 {-| Parse DOT Language in Elm.
 Take a look at the grammar <https://www.graphviz.org/doc/info/lang.html>
 
 @docs fromString, Dot
+
+
+# DOT Components
+
+@docs EdgeType, ID, Stmt
+
+
+# Stmt Components
+
+@docs NodeId, Attr, AttrStmtType, EdgeRHS, EdgeType, Subgraph
+
+
+# Internal
+
+@docs dot
 
 -}
 
