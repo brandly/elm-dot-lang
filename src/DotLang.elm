@@ -11,6 +11,12 @@ module DotLang exposing
     , dot
     , fromString
     )
+{-| Parse DOT Language in Elm.
+Take a look at the grammar <https://www.graphviz.org/doc/info/lang.html>
+
+@docs fromString, Dot
+
+-}
 
 import DoubleQuoteString as DQS
 import Html.Parser exposing (Node(..), node)
@@ -18,12 +24,6 @@ import Parser exposing (..)
 import Set
 
 
-{-| Parse DOT Language in Elm.
-Take a look at the grammar <https://www.graphviz.org/doc/info/lang.html>
-
-@docs fromString, Dot
-
--}
 
 
 {-| Parse a DOT string.
