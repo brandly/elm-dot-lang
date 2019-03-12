@@ -35,9 +35,9 @@ psg =
 suite : Test
 suite =
     let
-        edge : String -> EdgeType -> String -> Stmt
-        edge a edgeType b =
-            EdgeStmtNode (NodeId (ID a) Nothing) (EdgeNode edgeType (NodeId (ID b) Nothing)) [] []
+        edge : String -> String -> Stmt
+        edge a b =
+            EdgeStmtNode (NodeId (ID a) Nothing) (EdgeNode (NodeId (ID b) Nothing)) [] []
     in
     describe "Dot Lang Parser"
         [ test "parsing simple graph" <|
@@ -46,12 +46,12 @@ suite =
                     (Ok
                         (Dot Graph
                             Nothing
-                            [ edge "a" Graph "b"
-                            , edge "b" Graph "c"
-                            , edge "a" Graph "c"
-                            , edge "d" Graph "c"
-                            , edge "e" Graph "c"
-                            , edge "e" Graph "a"
+                            [ edge "a" "b"
+                            , edge "b" "c"
+                            , edge "a" "c"
+                            , edge "d" "c"
+                            , edge "e" "c"
+                            , edge "e" "a"
                             ]
                         )
                     )
@@ -61,12 +61,12 @@ suite =
                     (Ok
                         (Dot Graph
                             Nothing
-                            [ edge "a" Graph "b"
-                            , edge "b" Graph "c"
-                            , edge "a" Graph "c"
-                            , edge "d" Graph "c"
-                            , edge "e" Graph "c"
-                            , edge "e" Graph "a"
+                            [ edge "a" "b"
+                            , edge "b" "c"
+                            , edge "a" "c"
+                            , edge "d" "c"
+                            , edge "e" "c"
+                            , edge "e" "a"
                             ]
                         )
                     )
@@ -76,12 +76,12 @@ suite =
                     (Ok
                         (Dot Graph
                             Nothing
-                            [ edge "a" Graph "b"
-                            , edge "b" Graph "c"
-                            , edge "a" Graph "c"
-                            , edge "d" Graph "c"
-                            , edge "e" Graph "c"
-                            , edge "e" Graph "a"
+                            [ edge "a" "b"
+                            , edge "b" "c"
+                            , edge "a" "c"
+                            , edge "d" "c"
+                            , edge "e" "c"
+                            , edge "e" "a"
                             ]
                         )
                     )
@@ -102,10 +102,10 @@ suite =
                     (Ok
                         (Dot Digraph
                             Nothing
-                            [ edge "a" Digraph "b"
-                            , edge "b" Digraph "c"
-                            , edge "c" Digraph "d"
-                            , edge "d" Digraph "a"
+                            [ edge "a" "b"
+                            , edge "b" "c"
+                            , edge "c" "d"
+                            , edge "d" "a"
                             ]
                         )
                     )
@@ -123,7 +123,7 @@ suite =
                     (Ok
                         (Dot Digraph
                             (Just (ID "hello"))
-                            [ edge "a" Digraph "b"
+                            [ edge "a" "b"
                             ]
                         )
                     )
@@ -147,27 +147,27 @@ suite =
                         (Dot Digraph
                             Nothing
                             [ EdgeStmtNode (NodeId (ID "a") Nothing)
-                                (EdgeNode Digraph (NodeId (ID "b") Nothing))
+                                (EdgeNode (NodeId (ID "b") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.2"), Attr (ID "weight") (ID "0.2") ]
                             , EdgeStmtNode (NodeId (ID "a") Nothing)
-                                (EdgeNode Digraph (NodeId (ID "c") Nothing))
+                                (EdgeNode (NodeId (ID "c") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.4"), Attr (ID "weight") (ID "0.4") ]
                             , EdgeStmtNode (NodeId (ID "c") Nothing)
-                                (EdgeNode Digraph (NodeId (ID "b") Nothing))
+                                (EdgeNode (NodeId (ID "b") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.6"), Attr (ID "weight") (ID "0.6") ]
                             , EdgeStmtNode (NodeId (ID "c") Nothing)
-                                (EdgeNode Digraph (NodeId (ID "e") Nothing))
+                                (EdgeNode (NodeId (ID "e") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.6"), Attr (ID "weight") (ID "0.6") ]
                             , EdgeStmtNode (NodeId (ID "e") Nothing)
-                                (EdgeNode Digraph (NodeId (ID "e") Nothing))
+                                (EdgeNode (NodeId (ID "e") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.1"), Attr (ID "weight") (ID "0.1") ]
                             , EdgeStmtNode (NodeId (ID "e") Nothing)
-                                (EdgeNode Digraph (NodeId (ID "b") Nothing))
+                                (EdgeNode (NodeId (ID "b") Nothing))
                                 []
                                 [ Attr (ID "label") (ID "0.7"), Attr (ID "weight") (ID "0.7") ]
                             ]
@@ -195,23 +195,23 @@ suite =
                         (Dot Graph
                             Nothing
                             [ EdgeStmtNode (NodeId (ID "a") Nothing)
-                                (EdgeNode Graph (NodeId (ID "b") Nothing))
+                                (EdgeNode (NodeId (ID "b") Nothing))
                                 []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (NumeralID 3) ]
-                            , edge "b" Graph "c"
+                            , edge "b" "c"
                             , EdgeStmtNode (NodeId (ID "c") Nothing)
-                                (EdgeNode Graph (NodeId (ID "d") Nothing))
+                                (EdgeNode (NodeId (ID "d") Nothing))
                                 []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (NumeralID 3) ]
-                            , edge "d" Graph "e"
-                            , edge "e" Graph "f"
-                            , edge "a" Graph "d"
+                            , edge "d" "e"
+                            , edge "e" "f"
+                            , edge "a" "d"
                             , EdgeStmtNode (NodeId (ID "b") Nothing)
-                                (EdgeNode Graph (NodeId (ID "d") Nothing))
+                                (EdgeNode (NodeId (ID "d") Nothing))
                                 []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (NumeralID 3) ]
                             , EdgeStmtNode (NodeId (ID "c") Nothing)
-                                (EdgeNode Graph (NodeId (ID "f") Nothing))
+                                (EdgeNode (NodeId (ID "f") Nothing))
                                 []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (NumeralID 3) ]
                             ]
@@ -236,16 +236,16 @@ suite =
                         (Dot Graph
                             Nothing
                             [ EdgeStmtNode (NodeId (ID "a") Nothing)
-                                (EdgeNode Graph (NodeId (ID "b") Nothing))
-                                [ EdgeNode Graph (NodeId (ID "d") Nothing)
-                                , EdgeNode Graph (NodeId (ID "c") Nothing)
-                                , EdgeNode Graph (NodeId (ID "f") Nothing)
+                                (EdgeNode (NodeId (ID "b") Nothing))
+                                [ EdgeNode (NodeId (ID "d") Nothing)
+                                , EdgeNode (NodeId (ID "c") Nothing)
+                                , EdgeNode (NodeId (ID "f") Nothing)
                                 ]
                                 [ Attr (ID "color") (ID "red"), Attr (ID "penwidth") (NumeralID 3) ]
-                            , edge "b" Graph "c"
-                            , edge "d" Graph "e"
-                            , edge "e" Graph "f"
-                            , edge "a" Graph "d"
+                            , edge "b" "c"
+                            , edge "d" "e"
+                            , edge "e" "f"
+                            , edge "a" "d"
                             ]
                         )
                     )
@@ -277,15 +277,15 @@ suite =
                             [ SubgraphStmt <|
                                 Subgraph (Just (ID "cluster_0"))
                                     [ LooseAttr (Attr (ID "label") (ID "Subgraph A"))
-                                    , edge "a" Digraph "b"
-                                    , edge "b" Digraph "c"
-                                    , edge "c" Digraph "d"
+                                    , edge "a" "b"
+                                    , edge "b" "c"
+                                    , edge "c" "d"
                                     ]
                             , SubgraphStmt <|
                                 Subgraph (Just (ID "cluster_1"))
                                     [ LooseAttr (Attr (ID "label") (ID "Subgraph B"))
-                                    , edge "a" Digraph "f"
-                                    , edge "f" Digraph "c"
+                                    , edge "a" "f"
+                                    , edge "f" "c"
                                     ]
                             ]
                         )
@@ -305,7 +305,7 @@ suite =
                         (Dot Graph
                             Nothing
                             [ EdgeStmtNode (NodeId (ID "a") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "b") Nothing) []
                                         , NodeStmt (NodeId (ID "c") Nothing) []
@@ -354,7 +354,7 @@ suite =
                             Nothing
                             [ LooseAttr (Attr (ID "rankdir") (ID "LR"))
                             , EdgeStmtNode (NodeId (ID "a") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "b") Nothing) []
                                         , NodeStmt (NodeId (ID "c") Nothing) []
@@ -365,7 +365,7 @@ suite =
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "b") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "c") Nothing) []
                                         , NodeStmt (NodeId (ID "e") Nothing) []
@@ -376,7 +376,6 @@ suite =
                                 []
                             , EdgeStmtNode (NodeId (ID "c") Nothing)
                                 (EdgeSubgraph
-                                    Graph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "e") Nothing) []
                                         , NodeStmt (NodeId (ID "f") Nothing) []
@@ -386,7 +385,7 @@ suite =
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "d") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "f") Nothing) []
                                         , NodeStmt (NodeId (ID "g") Nothing) []
@@ -396,11 +395,11 @@ suite =
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "e") Nothing)
-                                (EdgeNode Graph (NodeId (ID "h") Nothing))
+                                (EdgeNode (NodeId (ID "h") Nothing))
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "f") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "h") Nothing) []
                                         , NodeStmt (NodeId (ID "i") Nothing) []
@@ -412,11 +411,11 @@ suite =
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "g") Nothing)
-                                (EdgeNode Graph (NodeId (ID "k") Nothing))
+                                (EdgeNode (NodeId (ID "k") Nothing))
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "h") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "o") Nothing) []
                                         , NodeStmt (NodeId (ID "l") Nothing) []
@@ -426,7 +425,7 @@ suite =
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "i") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "l") Nothing) []
                                         , NodeStmt (NodeId (ID "m") Nothing) []
@@ -437,7 +436,7 @@ suite =
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "j") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "m") Nothing) []
                                         , NodeStmt (NodeId (ID "n") Nothing) []
@@ -448,7 +447,7 @@ suite =
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "k") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "n") Nothing) []
                                         , NodeStmt (NodeId (ID "r") Nothing) []
@@ -458,7 +457,7 @@ suite =
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "l") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "o") Nothing) []
                                         , NodeStmt (NodeId (ID "m") Nothing) []
@@ -468,7 +467,7 @@ suite =
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "m") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "o") Nothing) []
                                         , NodeStmt (NodeId (ID "p") Nothing) []
@@ -479,7 +478,7 @@ suite =
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "n") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "q") Nothing) []
                                         , NodeStmt (NodeId (ID "r") Nothing) []
@@ -489,7 +488,7 @@ suite =
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "o") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "s") Nothing) []
                                         , NodeStmt (NodeId (ID "p") Nothing) []
@@ -499,7 +498,7 @@ suite =
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "p") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "s") Nothing) []
                                         , NodeStmt (NodeId (ID "t") Nothing) []
@@ -510,7 +509,7 @@ suite =
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "q") Nothing)
-                                (EdgeSubgraph Graph
+                                (EdgeSubgraph
                                     (Subgraph Nothing
                                         [ NodeStmt (NodeId (ID "t") Nothing) []
                                         , NodeStmt (NodeId (ID "r") Nothing) []
@@ -520,15 +519,15 @@ suite =
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "r") Nothing)
-                                (EdgeNode Graph (NodeId (ID "t") Nothing))
+                                (EdgeNode (NodeId (ID "t") Nothing))
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "s") Nothing)
-                                (EdgeNode Graph (NodeId (ID "z") Nothing))
+                                (EdgeNode (NodeId (ID "z") Nothing))
                                 []
                                 []
                             , EdgeStmtNode (NodeId (ID "t") Nothing)
-                                (EdgeNode Graph (NodeId (ID "z") Nothing))
+                                (EdgeNode (NodeId (ID "z") Nothing))
                                 []
                                 []
                             ]
@@ -544,7 +543,7 @@ suite =
                         (Dot Graph
                             Nothing
                             [ EdgeStmtNode (NodeId (ID "a") Nothing)
-                                (EdgeNode Graph (NodeId (ID "b") Nothing))
+                                (EdgeNode (NodeId (ID "b") Nothing))
                                 []
                                 [ Attr (ID "color") (ID "red"), Attr (ID "business") (ID "good") ]
                             ]
@@ -565,7 +564,7 @@ suite =
                                     , NodeStmt (NodeId (ID "b") Nothing) []
                                     ]
                                 )
-                                (EdgeNode Graph (NodeId (ID "c") Nothing))
+                                (EdgeNode (NodeId (ID "c") Nothing))
                                 []
                                 []
                             ]
@@ -580,7 +579,7 @@ suite =
                     (Ok
                         (Dot Graph
                             (Just (ID "world"))
-                            [ edge "a" Graph "b" ]
+                            [ edge "a" "b" ]
                         )
                     )
         , test "psg" <|
@@ -603,21 +602,43 @@ suite =
                             , NodeStmt (NodeId (ID "state7") Nothing) [ Attr (ID "style") (ID "filled"), Attr (ID "penwidth") (NumeralID 1), Attr (ID "fillcolor") (ID "white"), Attr (ID "fontname") (ID "Courier New"), Attr (ID "shape") (ID "Mrecord"), Attr (ID "label") (HtmlID (Element "table" [ ( "border", "0" ), ( "cellborder", "0" ), ( "cellpadding", "3" ), ( "bgcolor", "white" ) ] [ Element "tr" [] [ Element "td" [ ( "bgcolor", "black" ), ( "align", "center" ), ( "colspan", "2" ) ] [ Element "font" [ ( "color", "white" ) ] [ Text "State #7" ] ] ], Element "tr" [] [ Element "td" [ ( "align", "left" ), ( "port", "r1" ) ] [ Text "(1) e -> l '=' •r " ] ], Element "tr" [] [ Element "td" [ ( "align", "left" ), ( "port", "r3" ) ] [ Text "(3) l -> •'*' r " ] ], Element "tr" [] [ Element "td" [ ( "align", "left" ), ( "port", "r4" ) ] [ Text "(4) l -> •'n' " ] ], Element "tr" [] [ Element "td" [ ( "align", "left" ), ( "port", "r5" ) ] [ Text "(5) r -> •l " ] ] ])) ]
                             , NodeStmt (NodeId (ID "state8") Nothing) [ Attr (ID "style") (ID "filled"), Attr (ID "penwidth") (NumeralID 1), Attr (ID "fillcolor") (ID "white"), Attr (ID "fontname") (ID "Courier New"), Attr (ID "shape") (ID "Mrecord"), Attr (ID "label") (HtmlID (Element "table" [ ( "border", "0" ), ( "cellborder", "0" ), ( "cellpadding", "3" ), ( "bgcolor", "white" ) ] [ Element "tr" [] [ Element "td" [ ( "bgcolor", "black" ), ( "align", "center" ), ( "colspan", "2" ) ] [ Element "font" [ ( "color", "white" ) ] [ Text "State #8" ] ] ], Element "tr" [] [ Element "td" [ ( "align", "left" ), ( "port", "r1" ) ] [ Text "(1) e -> l '=' r •" ], Element "td" [ ( "bgcolor", "grey" ), ( "align", "right" ) ] [ Text "$" ] ] ])) ]
                             , NodeStmt (NodeId (ID "state9") Nothing) [ Attr (ID "style") (ID "filled"), Attr (ID "penwidth") (NumeralID 1), Attr (ID "fillcolor") (ID "white"), Attr (ID "fontname") (ID "Courier New"), Attr (ID "shape") (ID "Mrecord"), Attr (ID "label") (HtmlID (Element "table" [ ( "border", "0" ), ( "cellborder", "0" ), ( "cellpadding", "3" ), ( "bgcolor", "white" ) ] [ Element "tr" [] [ Element "td" [ ( "bgcolor", "black" ), ( "align", "center" ), ( "colspan", "2" ) ] [ Element "font" [ ( "color", "white" ) ] [ Text "State #9" ] ] ], Element "tr" [] [ Element "td" [ ( "align", "left" ), ( "port", "r2" ) ] [ Text "(2) e -> r •" ], Element "td" [ ( "bgcolor", "grey" ), ( "align", "right" ) ] [ Text "$" ] ] ])) ]
-                            , EdgeStmtNode (NodeId (ID "state0") Nothing) (EdgeNode Digraph (NodeId (ID "state5") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 5), Attr (ID "fontsize") (NumeralID 28), Attr (ID "fontcolor") (ID "black"), Attr (ID "label") (ID "e") ]
-                            , EdgeStmtNode (NodeId (ID "state0") Nothing) (EdgeNode Digraph (NodeId (ID "state6") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 5), Attr (ID "fontsize") (NumeralID 28), Attr (ID "fontcolor") (ID "black"), Attr (ID "label") (ID "l") ]
-                            , EdgeStmtNode (NodeId (ID "state0") Nothing) (EdgeNode Digraph (NodeId (ID "state9") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 5), Attr (ID "fontsize") (NumeralID 28), Attr (ID "fontcolor") (ID "black"), Attr (ID "label") (ID "r") ]
-                            , EdgeStmtNode (NodeId (ID "state0") Nothing) (EdgeNode Digraph (NodeId (ID "state1") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 1), Attr (ID "fontsize") (NumeralID 14), Attr (ID "fontcolor") (ID "grey28"), Attr (ID "label") (ID "'*'") ]
-                            , EdgeStmtNode (NodeId (ID "state0") Nothing) (EdgeNode Digraph (NodeId (ID "state2") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 1), Attr (ID "fontsize") (NumeralID 14), Attr (ID "fontcolor") (ID "grey28"), Attr (ID "label") (ID "'n'") ]
-                            , EdgeStmtNode (NodeId (ID "state1") Nothing) (EdgeNode Digraph (NodeId (ID "state1") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 1), Attr (ID "fontsize") (NumeralID 14), Attr (ID "fontcolor") (ID "grey28"), Attr (ID "label") (ID "'*'") ]
-                            , EdgeStmtNode (NodeId (ID "state1") Nothing) (EdgeNode Digraph (NodeId (ID "state4") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 5), Attr (ID "fontsize") (NumeralID 28), Attr (ID "fontcolor") (ID "black"), Attr (ID "label") (ID "r") ]
-                            , EdgeStmtNode (NodeId (ID "state1") Nothing) (EdgeNode Digraph (NodeId (ID "state2") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 1), Attr (ID "fontsize") (NumeralID 14), Attr (ID "fontcolor") (ID "grey28"), Attr (ID "label") (ID "'n'") ]
-                            , EdgeStmtNode (NodeId (ID "state1") Nothing) (EdgeNode Digraph (NodeId (ID "state3") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 5), Attr (ID "fontsize") (NumeralID 28), Attr (ID "fontcolor") (ID "black"), Attr (ID "label") (ID "l") ]
-                            , EdgeStmtNode (NodeId (ID "state6") Nothing) (EdgeNode Digraph (NodeId (ID "state7") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 1), Attr (ID "fontsize") (NumeralID 14), Attr (ID "fontcolor") (ID "grey28"), Attr (ID "label") (ID "'='") ]
-                            , EdgeStmtNode (NodeId (ID "state7") Nothing) (EdgeNode Digraph (NodeId (ID "state8") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 5), Attr (ID "fontsize") (NumeralID 28), Attr (ID "fontcolor") (ID "black"), Attr (ID "label") (ID "r") ]
-                            , EdgeStmtNode (NodeId (ID "state7") Nothing) (EdgeNode Digraph (NodeId (ID "state1") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 1), Attr (ID "fontsize") (NumeralID 14), Attr (ID "fontcolor") (ID "grey28"), Attr (ID "label") (ID "'*'") ]
-                            , EdgeStmtNode (NodeId (ID "state7") Nothing) (EdgeNode Digraph (NodeId (ID "state2") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 1), Attr (ID "fontsize") (NumeralID 14), Attr (ID "fontcolor") (ID "grey28"), Attr (ID "label") (ID "'n'") ]
-                            , EdgeStmtNode (NodeId (ID "state7") Nothing) (EdgeNode Digraph (NodeId (ID "state3") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 5), Attr (ID "fontsize") (NumeralID 28), Attr (ID "fontcolor") (ID "black"), Attr (ID "label") (ID "l") ]
+                            , EdgeStmtNode (NodeId (ID "state0") Nothing) (EdgeNode (NodeId (ID "state5") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 5), Attr (ID "fontsize") (NumeralID 28), Attr (ID "fontcolor") (ID "black"), Attr (ID "label") (ID "e") ]
+                            , EdgeStmtNode (NodeId (ID "state0") Nothing) (EdgeNode (NodeId (ID "state6") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 5), Attr (ID "fontsize") (NumeralID 28), Attr (ID "fontcolor") (ID "black"), Attr (ID "label") (ID "l") ]
+                            , EdgeStmtNode (NodeId (ID "state0") Nothing) (EdgeNode (NodeId (ID "state9") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 5), Attr (ID "fontsize") (NumeralID 28), Attr (ID "fontcolor") (ID "black"), Attr (ID "label") (ID "r") ]
+                            , EdgeStmtNode (NodeId (ID "state0") Nothing) (EdgeNode (NodeId (ID "state1") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 1), Attr (ID "fontsize") (NumeralID 14), Attr (ID "fontcolor") (ID "grey28"), Attr (ID "label") (ID "'*'") ]
+                            , EdgeStmtNode (NodeId (ID "state0") Nothing) (EdgeNode (NodeId (ID "state2") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 1), Attr (ID "fontsize") (NumeralID 14), Attr (ID "fontcolor") (ID "grey28"), Attr (ID "label") (ID "'n'") ]
+                            , EdgeStmtNode (NodeId (ID "state1") Nothing) (EdgeNode (NodeId (ID "state1") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 1), Attr (ID "fontsize") (NumeralID 14), Attr (ID "fontcolor") (ID "grey28"), Attr (ID "label") (ID "'*'") ]
+                            , EdgeStmtNode (NodeId (ID "state1") Nothing) (EdgeNode (NodeId (ID "state4") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 5), Attr (ID "fontsize") (NumeralID 28), Attr (ID "fontcolor") (ID "black"), Attr (ID "label") (ID "r") ]
+                            , EdgeStmtNode (NodeId (ID "state1") Nothing) (EdgeNode (NodeId (ID "state2") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 1), Attr (ID "fontsize") (NumeralID 14), Attr (ID "fontcolor") (ID "grey28"), Attr (ID "label") (ID "'n'") ]
+                            , EdgeStmtNode (NodeId (ID "state1") Nothing) (EdgeNode (NodeId (ID "state3") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 5), Attr (ID "fontsize") (NumeralID 28), Attr (ID "fontcolor") (ID "black"), Attr (ID "label") (ID "l") ]
+                            , EdgeStmtNode (NodeId (ID "state6") Nothing) (EdgeNode (NodeId (ID "state7") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 1), Attr (ID "fontsize") (NumeralID 14), Attr (ID "fontcolor") (ID "grey28"), Attr (ID "label") (ID "'='") ]
+                            , EdgeStmtNode (NodeId (ID "state7") Nothing) (EdgeNode (NodeId (ID "state8") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 5), Attr (ID "fontsize") (NumeralID 28), Attr (ID "fontcolor") (ID "black"), Attr (ID "label") (ID "r") ]
+                            , EdgeStmtNode (NodeId (ID "state7") Nothing) (EdgeNode (NodeId (ID "state1") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 1), Attr (ID "fontsize") (NumeralID 14), Attr (ID "fontcolor") (ID "grey28"), Attr (ID "label") (ID "'*'") ]
+                            , EdgeStmtNode (NodeId (ID "state7") Nothing) (EdgeNode (NodeId (ID "state2") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 1), Attr (ID "fontsize") (NumeralID 14), Attr (ID "fontcolor") (ID "grey28"), Attr (ID "label") (ID "'n'") ]
+                            , EdgeStmtNode (NodeId (ID "state7") Nothing) (EdgeNode (NodeId (ID "state3") Nothing)) [] [ Attr (ID "penwidth") (NumeralID 5), Attr (ID "fontsize") (NumeralID 28), Attr (ID "fontcolor") (ID "black"), Attr (ID "label") (ID "l") ]
                             ]
                         )
+                    )
+        , test "graph with arrows is an Err" <|
+            \_ ->
+                Expect.equal
+                    (fromString "graph { a -> b}")
+                    (Err
+                        [ { row = 1
+                          , col = 13
+                          , problem = Parser.Problem "Expected a graph, but this edge is for a digraph."
+                          }
+                        ]
+                    )
+        , test "digraph with lines is an Err" <|
+            \_ ->
+                Expect.equal
+                    (fromString "digraph { a -- b}")
+                    (Err
+                        [ { row = 1
+                          , col = 15
+                          , problem = Parser.Problem "Expected a digraph, but this edge is for a graph."
+                          }
+                        ]
                     )
         ]

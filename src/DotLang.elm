@@ -24,8 +24,6 @@ import Parser exposing (..)
 import Set
 
 
-
-
 {-| Parse a DOT string.
 
     fromString "graph {}" == Dot Graph Nothing []
@@ -43,15 +41,22 @@ type Dot
     = Dot EdgeType (Maybe ID) (List Stmt)
 
 
+{-| The core `Parser`, in case you want to embed it in some other parser.
+-}
 dot : Parser Dot
 dot =
-    succeed Dot
+    (succeed identity
         |. spacing
         |= edgeType
-        |. spacing
-        |= maybeParse id
-        |. spacing
-        |= stmtList
+    )
+        |> andThen
+            (\type_ ->
+                succeed (Dot type_)
+                    |. spacing
+                    |= maybeParse id
+                    |. spacing
+                    |= stmtList type_
+            )
 
 
 {-| A DOT file representing an undirected graph starts with `graph` and edges
@@ -85,14 +90,14 @@ type Subgraph
     = Subgraph (Maybe ID) (List Stmt)
 
 
-stmtList : Parser (List Stmt)
-stmtList =
+stmtList : EdgeType -> Parser (List Stmt)
+stmtList type_ =
     let
         help : List Stmt -> Parser (Step (List Stmt) (List Stmt))
         help revStmts =
             oneOf
                 [ succeed (\stmt -> Loop (stmt :: revStmts))
-                    |= statement
+                    |= statement type_
                     |. spacing
                     |. oneOf
                         [ symbol ";"
@@ -111,21 +116,21 @@ stmtList =
         |. symbol "}"
 
 
-statement : Parser Stmt
-statement =
+statement : EdgeType -> Parser Stmt
+statement type_ =
     oneOf
         [ attrStmt
         , (succeed identity
-            |= subgraph
+            |= subgraph type_
             |. spacing
           )
             |> andThen
                 (\sg ->
                     oneOf
                         [ succeed (EdgeStmtSubgraph sg)
-                            |= edgeRHS
+                            |= edgeRHS type_
                             |. spacing
-                            |= repeatingRhs
+                            |= repeatingRhs type_
                             |. spacing
                             |= parseWithDefault attrList []
                         , succeed (SubgraphStmt sg)
@@ -149,9 +154,9 @@ statement =
 
                         edge =
                             succeed (EdgeStmtNode (NodeId id_ maybePort))
-                                |= edgeRHS
+                                |= edgeRHS type_
                                 |. spacing
-                                |= repeatingRhs
+                                |= repeatingRhs type_
                                 |. spacing
                                 |= parseWithDefault attrList []
 
@@ -183,34 +188,50 @@ nodeStmt =
         |= parseWithDefault attrList []
 
 
-edgeStmtNode : Parser Stmt
-edgeStmtNode =
+edgeStmtNode : EdgeType -> Parser Stmt
+edgeStmtNode type_ =
     succeed EdgeStmtNode
         |= nodeId
         |. spacing
-        |= edgeRHS
+        |= edgeRHS type_
         |. spacing
-        |= repeatingRhs
+        |= repeatingRhs type_
         |. spacing
         |= parseWithDefault attrList []
 
 
 type EdgeRHS
-    = EdgeNode EdgeType NodeId
-    | EdgeSubgraph EdgeType Subgraph
+    = EdgeNode NodeId
+    | EdgeSubgraph Subgraph
 
 
-edgeRHS : Parser EdgeRHS
-edgeRHS =
+edgeRHS : EdgeType -> Parser EdgeRHS
+edgeRHS type_ =
     succeed identity
-        |= edgeOp
+        |. (edgeOp
+                |> andThen
+                    (\op ->
+                        if op == type_ then
+                            succeed op
+
+                        else
+                            problem <|
+                                String.join ""
+                                    [ "Expected a "
+                                    , showEdgeType type_
+                                    , ", but this edge is for a "
+                                    , showEdgeType op
+                                    , "."
+                                    ]
+                    )
+           )
         |. spacing
         |> andThen
             (\edge ->
                 oneOf
-                    [ succeed (EdgeSubgraph edge)
-                        |= subgraph
-                    , succeed (EdgeNode edge)
+                    [ succeed EdgeSubgraph
+                        |= subgraph type_
+                    , succeed EdgeNode
                         |= nodeId
                     ]
             )
@@ -224,14 +245,24 @@ edgeOp =
         ]
 
 
-repeatingRhs : Parser (List EdgeRHS)
-repeatingRhs =
+showEdgeType : EdgeType -> String
+showEdgeType type_ =
+    case type_ of
+        Graph ->
+            "graph"
+
+        Digraph ->
+            "digraph"
+
+
+repeatingRhs : EdgeType -> Parser (List EdgeRHS)
+repeatingRhs type_ =
     let
         help : List EdgeRHS -> Parser (Step (List EdgeRHS) (List EdgeRHS))
         help revStmts =
             oneOf
                 [ succeed (\stmt -> Loop (stmt :: revStmts))
-                    |= edgeRHS
+                    |= edgeRHS type_
                     |. spacing
                 , succeed ()
                     |> map (\_ -> Done (List.reverse revStmts))
@@ -306,18 +337,18 @@ attr =
         |= id
 
 
-subgraph : Parser Subgraph
-subgraph =
+subgraph : EdgeType -> Parser Subgraph
+subgraph type_ =
     oneOf
         [ succeed Subgraph
             |. symbol "subgraph"
             |. spacing
             |= maybeParse id
             |. spacing
-            |= stmtList
+            |= stmtList type_
         , succeed (Subgraph Nothing)
             |. spacing
-            |= stmtList
+            |= stmtList type_
         ]
 
 
