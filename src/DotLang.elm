@@ -95,10 +95,6 @@ type Stmt
     | SubgraphStmt Subgraph
 
 
-type Subgraph
-    = Subgraph (Maybe ID) (List Stmt)
-
-
 stmtList : EdgeType -> Parser (List Stmt)
 stmtList type_ =
     let
@@ -189,26 +185,6 @@ statement type_ =
         ]
 
 
-nodeStmt : Parser Stmt
-nodeStmt =
-    succeed NodeStmt
-        |= nodeId
-        |. spacing
-        |= parseWithDefault attrList []
-
-
-edgeStmtNode : EdgeType -> Parser Stmt
-edgeStmtNode type_ =
-    succeed EdgeStmtNode
-        |= nodeId
-        |. spacing
-        |= edgeRHS type_
-        |. spacing
-        |= repeatingRhs type_
-        |. spacing
-        |= parseWithDefault attrList []
-
-
 type EdgeRHS
     = EdgeNode NodeId
     | EdgeSubgraph Subgraph
@@ -280,6 +256,14 @@ repeatingRhs type_ =
     loop [] help
 
 
+attrStmt : Parser Stmt
+attrStmt =
+    succeed AttrStmt
+        |= attrStmtType
+        |. spacing
+        |= attrList
+
+
 type AttrStmtType
     = AttrGraph
     | AttrNode
@@ -295,16 +279,18 @@ attrStmtType =
         ]
 
 
-attrStmt : Parser Stmt
-attrStmt =
-    succeed AttrStmt
-        |= attrStmtType
-        |. spacing
-        |= attrList
-
-
 type Attr
     = Attr ID ID
+
+
+attr : Parser Attr
+attr =
+    succeed Attr
+        |= id
+        |. spacing
+        |. symbol "="
+        |. spacing
+        |= id
 
 
 attrList : Parser (List Attr)
@@ -336,14 +322,8 @@ attrList =
             |= lazy (\_ -> parseWithDefault attrList [])
 
 
-attr : Parser Attr
-attr =
-    succeed Attr
-        |= id
-        |. spacing
-        |. symbol "="
-        |. spacing
-        |= id
+type Subgraph
+    = Subgraph (Maybe ID) (List Stmt)
 
 
 subgraph : EdgeType -> Parser Subgraph
