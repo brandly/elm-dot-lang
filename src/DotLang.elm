@@ -3,6 +3,7 @@ module DotLang exposing
     , EdgeType(..), ID(..), Stmt(..)
     , NodeId(..), Attr(..), AttrStmtType(..), EdgeRHS(..), Subgraph(..)
     , dot
+    , toString
     )
 
 {-| Parse DOT Language in Elm.
@@ -28,7 +29,7 @@ Take a look at the grammar <https://www.graphviz.org/doc/info/lang.html>
 -}
 
 import DoubleQuoteString as DQS
-import Html.Parser exposing (Node(..), node)
+import Html.Parser exposing (Node(..), node, nodeToString)
 import Parser exposing (..)
 import Set
 
@@ -41,6 +42,42 @@ import Set
 fromString : String -> Result (List Parser.DeadEnd) Dot
 fromString =
     Parser.run dot
+
+
+toString : Dot -> String
+toString (Dot type_ maybeId stmts) =
+    let
+        showId : ID -> String
+        showId id__ =
+            case id__ of
+                ID str ->
+                    str
+
+                HtmlID node ->
+                    nodeToString node
+
+                NumeralID float ->
+                    String.fromFloat float
+
+        showType : EdgeType -> String
+        showType type__ =
+            case type__ of
+                Graph ->
+                    "graph"
+
+                Digraph ->
+                    "digraph"
+
+        showStmt : Stmt -> String
+        showStmt stmt =
+            Debug.todo "showStmt"
+
+        id_ =
+            maybeId
+                |> Maybe.map (showId >> (\str -> " " ++ str))
+                |> Maybe.withDefault ""
+    in
+    showType type_ ++ id_ ++ " {" ++ String.join "\n" (List.map showStmt stmts) ++ "}"
 
 
 {-| A DOT file. Either a `graph` or `digraph` is represented. It might have
