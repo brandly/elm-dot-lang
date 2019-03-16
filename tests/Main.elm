@@ -657,4 +657,8 @@ testToString =
                 Expect.equal
                     (toString (Dot Graph (Just (ID "abc")) []))
                     "graph abc {}"
+        , test "simple graph" <|
+            \_ ->
+                Expect.equal (Result.map toString (fromString simpleGraph))
+                    (Ok simpleGraph)
         ]
