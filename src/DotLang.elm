@@ -44,215 +44,6 @@ fromString =
     Parser.run dot
 
 
-toString : Dot -> String
-toString (Dot type_ maybeId stmts) =
-    let
-        indent : String
-        indent =
-            "    "
-
-        showId : ID -> String
-        showId id__ =
-            case id__ of
-                ID str ->
-                    let
-                        escaped =
-                            String.replace "\\\"" "\\\"" str
-                    in
-                    if String.contains " " str || String.contains "\"" str then
-                        "\"" ++ escaped ++ "\""
-
-                    else
-                        str
-
-                HtmlID node ->
-                    nodeToString node
-
-                NumeralID float ->
-                    String.fromFloat float
-
-        showNodeId : NodeId -> String
-        showNodeId (NodeId id__ maybePort) =
-            showId id__
-                ++ (maybePort
-                        |> Maybe.map (showPort >> String.cons ':')
-                        |> Maybe.withDefault ""
-                   )
-
-        showPort : Port -> String
-        showPort port__ =
-            case port__ of
-                PortId id__ maybeCompassPt ->
-                    showId id__
-                        ++ (maybeCompassPt
-                                |> Maybe.map (showCompassPt >> String.cons ':')
-                                |> Maybe.withDefault ""
-                           )
-
-                PortPt compassPt_ ->
-                    showCompassPt compassPt_
-
-        showCompassPt : CompassPt -> String
-        showCompassPt compassPt_ =
-            case compassPt_ of
-                N ->
-                    "n"
-
-                NE ->
-                    "ne"
-
-                E ->
-                    "e"
-
-                SE ->
-                    "se"
-
-                S ->
-                    "s"
-
-                SW ->
-                    "sw"
-
-                W ->
-                    "w"
-
-                NW ->
-                    "nw"
-
-                C ->
-                    "c"
-
-                UND ->
-                    "_"
-
-        reverseTuple : ( a, b ) -> ( b, a )
-        reverseTuple ( a, b ) =
-            ( b, a )
-
-        showType : EdgeType -> String
-        showType type__ =
-            case type__ of
-                Graph ->
-                    "graph"
-
-                Digraph ->
-                    "digraph"
-
-        showAttr : Attr -> String
-        showAttr (Attr a b) =
-            String.join "=" [ showId a, showId b ]
-
-        filterEmpty : List String -> List String
-        filterEmpty =
-            List.filter (String.length >> (<) 0)
-
-        edgeStr =
-            case type_ of
-                Graph ->
-                    "--"
-
-                Digraph ->
-                    "->"
-
-        showRHS : Int -> EdgeRHS -> String
-        showRHS depth rhs =
-            String.join " "
-                [ edgeStr
-                , case rhs of
-                    EdgeNode nodeId_ ->
-                        showNodeId nodeId_
-
-                    EdgeSubgraph subgraph_ ->
-                        showSubgraph depth subgraph_
-                ]
-
-        showSubgraph : Int -> Subgraph -> String
-        showSubgraph depth (Subgraph maybeId_ stmts_) =
-            "subgraph "
-                ++ (maybeId_
-                        |> Maybe.map (showId >> (\str -> str ++ " "))
-                        |> Maybe.withDefault ""
-                   )
-                ++ showStmts (depth + 1) stmts_
-
-        showStmts : Int -> List Stmt -> String
-        showStmts depth stmts_ =
-            let
-                separator : Int -> String
-                separator d =
-                    String.cons '\n' (String.repeat d indent)
-            in
-            if List.isEmpty stmts_ then
-                "{}"
-
-            else
-                String.join (separator depth)
-                    ("{" :: List.map (showStmt depth) stmts_)
-                    ++ (separator (depth - 1) ++ "}")
-
-        showAttrs : String -> List Attr -> String
-        showAttrs default attrs =
-            if List.isEmpty attrs then
-                default
-
-            else
-                "[" ++ String.join "," (List.map showAttr attrs) ++ "]"
-
-        showAttrStmtType : AttrStmtType -> String
-        showAttrStmtType type__ =
-            case type__ of
-                AttrGraph ->
-                    "graph"
-
-                AttrNode ->
-                    "node"
-
-                AttrEdge ->
-                    "edge"
-
-        showStmt : Int -> Stmt -> String
-        showStmt depth stmt =
-            case stmt of
-                NodeStmt nodeId_ attrs ->
-                    (filterEmpty >> String.join "")
-                        [ showNodeId nodeId_
-                        , showAttrs "" attrs
-                        ]
-
-                EdgeStmtNode nodeId_ rhs moreRhs attrs ->
-                    (filterEmpty >> String.join " ")
-                        [ showNodeId nodeId_
-                        , showRHS depth rhs
-                        , String.join "" (List.map (showRHS depth) moreRhs)
-                        ]
-                        ++ showAttrs "" attrs
-
-                EdgeStmtSubgraph subgraph_ rhs moreRhs attrs ->
-                    (filterEmpty >> String.join " ")
-                        [ showSubgraph depth subgraph_
-                        , showRHS depth rhs
-                        , String.join "" (List.map (showRHS depth) moreRhs)
-                        , showAttrs "" attrs
-                        ]
-
-                AttrStmt type__ attrs ->
-                    (filterEmpty >> String.join " ")
-                        [ showAttrStmtType type__, showAttrs "[]" attrs ]
-
-                LooseAttr attr_ ->
-                    showAttr attr_
-
-                SubgraphStmt subgraph_ ->
-                    showSubgraph depth subgraph_
-
-        id_ =
-            maybeId
-                |> Maybe.map (showId >> (\str -> str ++ " "))
-                |> Maybe.withDefault ""
-    in
-    showType type_ ++ " " ++ id_ ++ showStmts 1 stmts
-
-
 {-| A DOT file. Either a `graph` or `digraph` is represented. It might have
 an `ID`. `Stmt`s describe the graph's properties, including vertices and edges.
 -}
@@ -701,3 +492,219 @@ maybeParse parser =
         [ map Just parser
         , succeed Nothing
         ]
+
+
+filterEmpty : List String -> List String
+filterEmpty =
+    List.filter (String.length >> (<) 0)
+
+
+toString : Dot -> String
+toString (Dot type_ maybeId stmts) =
+    let
+        indent : String
+        indent =
+            "    "
+
+        id_ : String
+        id_ =
+            maybeId
+                |> Maybe.map (showId >> (\str -> str ++ " "))
+                |> Maybe.withDefault ""
+
+        edgeStr : String
+        edgeStr =
+            case type_ of
+                Graph ->
+                    "--"
+
+                Digraph ->
+                    "->"
+
+        showRHS : Int -> EdgeRHS -> String
+        showRHS depth rhs =
+            String.join " "
+                [ edgeStr
+                , case rhs of
+                    EdgeNode nodeId_ ->
+                        showNodeId nodeId_
+
+                    EdgeSubgraph subgraph_ ->
+                        showSubgraph depth subgraph_
+                ]
+
+        showSubgraph : Int -> Subgraph -> String
+        showSubgraph depth (Subgraph maybeId_ stmts_) =
+            "subgraph "
+                ++ (maybeId_
+                        |> Maybe.map (showId >> (\str -> str ++ " "))
+                        |> Maybe.withDefault ""
+                   )
+                ++ showStmts (depth + 1) stmts_
+
+        showStmts : Int -> List Stmt -> String
+        showStmts depth stmts_ =
+            let
+                separator : Int -> String
+                separator d =
+                    String.cons '\n' (String.repeat d indent)
+            in
+            if List.isEmpty stmts_ then
+                "{}"
+
+            else
+                String.join (separator depth)
+                    ("{" :: List.map (showStmt depth) stmts_)
+                    ++ (separator (depth - 1) ++ "}")
+
+        showStmt : Int -> Stmt -> String
+        showStmt depth stmt =
+            case stmt of
+                NodeStmt nodeId_ attrs ->
+                    (filterEmpty >> String.join "")
+                        [ showNodeId nodeId_
+                        , showAttrs "" attrs
+                        ]
+
+                EdgeStmtNode nodeId_ rhs moreRhs attrs ->
+                    (filterEmpty >> String.join " ")
+                        [ showNodeId nodeId_
+                        , showRHS depth rhs
+                        , String.join "" (List.map (showRHS depth) moreRhs)
+                        ]
+                        ++ showAttrs "" attrs
+
+                EdgeStmtSubgraph subgraph_ rhs moreRhs attrs ->
+                    (filterEmpty >> String.join " ")
+                        [ showSubgraph depth subgraph_
+                        , showRHS depth rhs
+                        , String.join "" (List.map (showRHS depth) moreRhs)
+                        , showAttrs "" attrs
+                        ]
+
+                AttrStmt type__ attrs ->
+                    (filterEmpty >> String.join " ")
+                        [ showAttrStmtType type__, showAttrs "[]" attrs ]
+
+                LooseAttr attr_ ->
+                    showAttr attr_
+
+                SubgraphStmt subgraph_ ->
+                    showSubgraph depth subgraph_
+    in
+    showType type_ ++ " " ++ id_ ++ showStmts 1 stmts
+
+
+showId : ID -> String
+showId id__ =
+    case id__ of
+        ID str ->
+            let
+                escaped =
+                    String.replace "\\\"" "\\\"" str
+            in
+            if String.contains " " str || String.contains "\"" str then
+                "\"" ++ escaped ++ "\""
+
+            else
+                str
+
+        HtmlID node ->
+            nodeToString node
+
+        NumeralID float ->
+            String.fromFloat float
+
+
+showNodeId : NodeId -> String
+showNodeId (NodeId id__ maybePort) =
+    showId id__
+        ++ (maybePort
+                |> Maybe.map (showPort >> String.cons ':')
+                |> Maybe.withDefault ""
+           )
+
+
+showType : EdgeType -> String
+showType type__ =
+    case type__ of
+        Graph ->
+            "graph"
+
+        Digraph ->
+            "digraph"
+
+
+showAttrs : String -> List Attr -> String
+showAttrs default attrs =
+    if List.isEmpty attrs then
+        default
+
+    else
+        "[" ++ String.join "," (List.map showAttr attrs) ++ "]"
+
+
+showAttr : Attr -> String
+showAttr (Attr a b) =
+    String.join "=" [ showId a, showId b ]
+
+
+showAttrStmtType : AttrStmtType -> String
+showAttrStmtType type__ =
+    case type__ of
+        AttrGraph ->
+            "graph"
+
+        AttrNode ->
+            "node"
+
+        AttrEdge ->
+            "edge"
+
+
+showPort : Port -> String
+showPort port__ =
+    case port__ of
+        PortId id__ maybeCompassPt ->
+            showId id__
+                ++ (maybeCompassPt
+                        |> Maybe.map (showCompassPt >> String.cons ':')
+                        |> Maybe.withDefault ""
+                   )
+
+        PortPt compassPt_ ->
+            showCompassPt compassPt_
+
+
+showCompassPt : CompassPt -> String
+showCompassPt compassPt_ =
+    case compassPt_ of
+        N ->
+            "n"
+
+        NE ->
+            "ne"
+
+        E ->
+            "e"
+
+        SE ->
+            "se"
+
+        S ->
+            "s"
+
+        SW ->
+            "sw"
+
+        W ->
+            "w"
+
+        NW ->
+            "nw"
+
+        C ->
+            "c"
+
+        UND ->
+            "_"
