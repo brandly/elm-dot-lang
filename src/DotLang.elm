@@ -55,9 +55,12 @@ toString (Dot type_ maybeId stmts) =
         showId id__ =
             case id__ of
                 ID str ->
-                    -- TODO: escape quotes
-                    if String.contains " " str then
-                        "\"" ++ str ++ "\""
+                    let
+                        escaped =
+                            String.replace "\\\"" "\\\"" str
+                    in
+                    if String.contains " " str || String.contains "\"" str then
+                        "\"" ++ escaped ++ "\""
 
                     else
                         str
@@ -185,8 +188,7 @@ toString (Dot type_ maybeId stmts) =
             else
                 String.join (separator depth)
                     ("{" :: List.map (showStmt depth) stmts_)
-                    ++ separator (depth - 1)
-                    ++ "}"
+                    ++ (separator (depth - 1) ++ "}")
 
         showAttrs : String -> List Attr -> String
         showAttrs default attrs =
