@@ -16,12 +16,12 @@ simpleGraph : String
 simpleGraph =
     String.join "\n"
         [ "graph {"
-        , "    a -- b;"
-        , "    b -- c;"
-        , "    a -- c;"
-        , "    d -- c;"
-        , "    e -- c;"
-        , "    e -- a;"
+        , "    a -- b"
+        , "    b -- c"
+        , "    a -- c"
+        , "    d -- c"
+        , "    e -- c"
+        , "    e -- a"
         , "}"
         ]
 
@@ -267,7 +267,6 @@ testFromString =
                             , "        f -> c;"
                             , "    }"
                             , "}"
-                            , "    "
                             ]
                         )
                     )
@@ -661,4 +660,45 @@ testToString =
             \_ ->
                 Expect.equal (Result.map toString (fromString simpleGraph))
                     (Ok simpleGraph)
+        , test "full graph" <|
+            \_ ->
+                let
+                    g =
+                        String.join "\n"
+                            [ "digraph {"
+                            , "    a -> b[label=0.2,weight=0.2]"
+                            , "    a -> c[label=0.4,weight=0.4]"
+                            , "    c -> b[label=0.6,weight=0.6]"
+                            , "    c -> e[label=0.6,weight=0.6]"
+                            , "    e -> e[label=0.1,weight=0.1]"
+                            , "    e -> b[label=0.7,weight=0.7]"
+                            , "}"
+                            ]
+                in
+                Expect.equal
+                    (Result.map toString (fromString g))
+                    (Ok g)
+        , test "subgraphs" <|
+            \_ ->
+                let
+                    g =
+                        String.join "\n"
+                            [ "digraph {"
+                            , "    subgraph cluster_0 {"
+                            , "        label=\"Subgraph A\""
+                            , "        a -> b"
+                            , "        b -> c"
+                            , "        c -> d"
+                            , "    }"
+                            , "    subgraph cluster_1 {"
+                            , "        label=\"Subgraph B\""
+                            , "        a -> f"
+                            , "        f -> c"
+                            , "    }"
+                            , "}"
+                            ]
+                in
+                Expect.equal
+                    (Result.map toString (fromString g))
+                    (Ok g)
         ]
