@@ -213,7 +213,7 @@ edgeRHS type_ =
            )
         |. spacing
         |> andThen
-            (\edge ->
+            (\_ ->
                 oneOf
                     [ succeed EdgeSubgraph
                         |= subgraph type_
@@ -597,8 +597,8 @@ toString (Dot type_ maybeId stmts) =
 
 
 showId : ID -> String
-showId id__ =
-    case id__ of
+showId id_ =
+    case id_ of
         ID str ->
             let
                 escaped =
@@ -618,8 +618,8 @@ showId id__ =
 
 
 showNodeId : NodeId -> String
-showNodeId (NodeId id__ maybePort) =
-    showId id__
+showNodeId (NodeId id_ maybePort) =
+    showId id_
         ++ (maybePort
                 |> Maybe.map (showPort >> String.cons ':')
                 |> Maybe.withDefault ""
@@ -627,8 +627,8 @@ showNodeId (NodeId id__ maybePort) =
 
 
 showType : EdgeType -> String
-showType type__ =
-    case type__ of
+showType type_ =
+    case type_ of
         Graph ->
             "graph"
 
@@ -651,8 +651,8 @@ showAttr (Attr a b) =
 
 
 showAttrStmtType : AttrStmtType -> String
-showAttrStmtType type__ =
-    case type__ of
+showAttrStmtType type_ =
+    case type_ of
         AttrGraph ->
             "graph"
 
