@@ -535,12 +535,13 @@ toString (Dot type_ maybeId stmts) =
 
         showSubgraph : Int -> Subgraph -> String
         showSubgraph depth (Subgraph maybeId_ stmts_) =
-            "subgraph "
-                ++ (maybeId_
-                        |> Maybe.map (showId >> (\str -> str ++ " "))
-                        |> Maybe.withDefault ""
-                   )
-                ++ showStmts (depth + 1) stmts_
+            (filterEmpty >> String.join " ")
+                [ "subgraph"
+                , maybeId_
+                    |> Maybe.map showId
+                    |> Maybe.withDefault ""
+                , showStmts (depth + 1) stmts_
+                ]
 
         showStmts : Int -> List Stmt -> String
         showStmts depth stmts_ =
