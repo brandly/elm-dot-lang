@@ -19,7 +19,7 @@ Take a look at the grammar <https://www.graphviz.org/doc/info/lang.html>
 
 # Stmt Components
 
-@docs NodeId, Attr, AttrStmtType, EdgeRHS, EdgeType, Subgraph
+@docs NodeId, Attr, AttrStmtType, EdgeRHS, Subgraph
 
 
 # toString
