@@ -1,7 +1,7 @@
 module DotLang exposing
     ( fromString, Dot(..)
     , EdgeType(..), ID(..), Stmt(..)
-    , NodeId(..), Attr(..), AttrStmtType(..), EdgeRHS(..), Subgraph(..)
+    , NodeId(..), Attr(..), AttrStmtType(..), EdgeRHS(..), Subgraph(..), Port(..), CompassPt(..)
     , toString, Config(..), toStringWithConfig
     , dot
     )
@@ -19,7 +19,7 @@ Take a look at the grammar <https://www.graphviz.org/doc/info/lang.html>
 
 # Stmt Components
 
-@docs NodeId, Attr, AttrStmtType, EdgeRHS, Subgraph
+@docs NodeId, Attr, AttrStmtType, EdgeRHS, Subgraph, Port, CompassPt
 
 
 # toString
@@ -406,6 +406,9 @@ id =
         ]
 
 
+{-| A `Port` is a point where edges can attach to a vertex. The `Port` can have
+an `ID`, but they're primarily described by the 8 compass directions.
+-}
 type Port
     = PortId ID (Maybe CompassPt)
     | PortPt CompassPt
@@ -426,6 +429,9 @@ port_ =
             ]
 
 
+{-| A `CompassPt` describes the 8 compass directions, as well as `C` for
+"center" and `UND` for the default, unspecified direction.
+-}
 type CompassPt
     = N
     | NE
