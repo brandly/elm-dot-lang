@@ -378,6 +378,8 @@ nodeId =
         |= maybeParse port_
 
 
+{-| The identifier for a vertex.
+-}
 type ID
     = ID String
     | HtmlID Node
