@@ -91,6 +91,9 @@ edgeType =
         ]
 
 
+{-| This is the core of a graph's definition. DOT holds a list of statements
+describing the vertices and edges, along with their properties.
+-}
 type Stmt
     = NodeStmt NodeId (List Attr)
     | EdgeStmtNode NodeId EdgeRHS (List EdgeRHS) (List Attr)
@@ -191,6 +194,10 @@ statement type_ =
         ]
 
 
+{-| The right-hand side of an edge describes what the left-hand side is
+connected to. In DOT, you can string together many right-hand sides to describe
+large graph structures in a single Stmt.
+-}
 type EdgeRHS
     = EdgeNode NodeId
     | EdgeSubgraph Subgraph
@@ -270,6 +277,9 @@ attrStmt =
         |= attrList
 
 
+{-| An `AttrStmt` might apply to all nodes or edges, or even the graph as a
+whole. The `AttrStmtType` indicates which is being described.
+-}
 type AttrStmtType
     = AttrGraph
     | AttrNode
@@ -285,6 +295,8 @@ attrStmtType =
         ]
 
 
+{-| An Attr is just a key/value pair describing a property of the graph.
+-}
 type Attr
     = Attr ID ID
 
@@ -328,6 +340,10 @@ attrList =
             |= lazy (\_ -> parseWithDefault attrList [])
 
 
+{-| A subgraph defines a subset of vertices and edges within a graph. You might
+use this for to visually group a set of vertices together or just as a
+shorthand for defining edges between one vertex and a list of other vertices.
+-}
 type Subgraph
     = Subgraph (Maybe ID) (List Stmt)
 
@@ -347,6 +363,9 @@ subgraph type_ =
         ]
 
 
+{-| NodeId describes the ID of a vertex. Potentially, it has a Port which
+describes where edges can attach to the vertex.
+-}
 type NodeId
     = NodeId ID (Maybe Port)
 
@@ -504,16 +523,25 @@ filterEmpty =
     List.filter (String.length >> (<) 0)
 
 
+{-| Configure `toStringWithConfig`, either exporting a graph onto `OneLine`,
+if you don't care about readability, or with some number of spaces per
+`Indent`.
+-}
 type Config
     = OneLine
     | Indent Int
 
 
+{-| Export Dot into valid DOT Language syntax, using four spaces for
+indentation.
+-}
 toString : Dot -> String
 toString =
     toStringWithConfig (Indent 4)
 
 
+{-| Export Dot into valid DOT Language syntax with a given `Config`.
+-}
 toStringWithConfig : Config -> Dot -> String
 toStringWithConfig config (Dot type_ maybeId stmts) =
     let
