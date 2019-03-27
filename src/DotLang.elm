@@ -41,7 +41,7 @@ import Set
 
 {-| Parse a DOT string.
 
-    fromString "graph {}" == Dot Graph Nothing []
+    fromString "graph {}" == Ok (Dot Graph Nothing [])
 
 -}
 fromString : String -> Result (List Parser.DeadEnd) Dot
@@ -536,6 +536,9 @@ type Config
 
 {-| Export `Dot` into valid DOT Language syntax, using four spaces for
 indentation.
+
+    toString (Dot Graph Nothing []) == "graph {}"
+
 -}
 toString : Dot -> String
 toString =
