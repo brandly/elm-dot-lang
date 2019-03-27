@@ -16,12 +16,12 @@ simpleGraph : String
 simpleGraph =
     String.join "\n"
         [ "graph {"
-        , "    a -- b"
-        , "    b -- c"
-        , "    a -- c"
-        , "    d -- c"
-        , "    e -- c"
-        , "    e -- a"
+        , "    a -- b;"
+        , "    b -- c;"
+        , "    a -- c;"
+        , "    d -- c;"
+        , "    e -- c;"
+        , "    e -- a;"
         , "}"
         ]
 
@@ -57,7 +57,7 @@ testFromString =
                     )
         , test "don't need semicolons" <|
             \_ ->
-                Expect.equal (fromString (String.filter (\c -> c /= ';') simpleGraph))
+                Expect.equal (fromString (String.filter ((/=) ';') simpleGraph))
                     (Ok
                         (Dot Graph
                             Nothing
@@ -658,8 +658,12 @@ testToString =
                     "graph abc {}"
         , test "simple graph" <|
             \_ ->
-                Expect.equal (Result.map toString (fromString simpleGraph))
-                    (Ok simpleGraph)
+                let
+                    noSemis =
+                        String.filter ((/=) ';') simpleGraph
+                in
+                Expect.equal (Result.map toString (fromString noSemis))
+                    (Ok noSemis)
         , test "full graph" <|
             \_ ->
                 let
