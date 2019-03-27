@@ -6,3 +6,10 @@ import DotLang
 DotLang.fromString "graph { a -- b }"
 -- => Ok (Dot Graph Nothing [EdgeStmtNode (NodeId (ID "a") Nothing) (EdgeNode Graph (NodeId (ID "b") Nothing)) [] []])
 ```
+
+### development
+
+```
+$ npm install
+$ npm test -- --watch
+```
