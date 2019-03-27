@@ -2,6 +2,7 @@ module DotLang exposing
     ( fromString, Dot(..)
     , EdgeType(..), ID(..), Stmt(..)
     , NodeId(..), Attr(..), AttrStmtType(..), EdgeRHS(..), Subgraph(..)
+    , toString, Config(..), toStringWithConfig
     , dot
     )
 
@@ -21,6 +22,11 @@ Take a look at the grammar <https://www.graphviz.org/doc/info/lang.html>
 @docs NodeId, Attr, AttrStmtType, EdgeRHS, EdgeType, Subgraph
 
 
+# toString
+
+@docs toString, Config, toStringWithConfig
+
+
 # Internal
 
 @docs dot
@@ -28,7 +34,7 @@ Take a look at the grammar <https://www.graphviz.org/doc/info/lang.html>
 -}
 
 import DoubleQuoteString as DQS
-import Html.Parser exposing (Node(..), node)
+import Html.Parser exposing (Node(..), node, nodeToString)
 import Parser exposing (..)
 import Set
 
@@ -212,7 +218,7 @@ edgeRHS type_ =
            )
         |. spacing
         |> andThen
-            (\edge ->
+            (\_ ->
                 oneOf
                     [ succeed EdgeSubgraph
                         |= subgraph type_
@@ -491,3 +497,235 @@ maybeParse parser =
         [ map Just parser
         , succeed Nothing
         ]
+
+
+filterEmpty : List String -> List String
+filterEmpty =
+    List.filter (String.length >> (<) 0)
+
+
+type Config
+    = OneLine
+    | Indent Int
+
+
+toString : Dot -> String
+toString =
+    toStringWithConfig (Indent 4)
+
+
+toStringWithConfig : Config -> Dot -> String
+toStringWithConfig config (Dot type_ maybeId stmts) =
+    let
+        separator : Int -> String
+        separator depth =
+            case config of
+                OneLine ->
+                    " "
+
+                Indent count ->
+                    let
+                        indent : String
+                        indent =
+                            String.repeat count " "
+                    in
+                    String.cons '\n' (String.repeat depth indent)
+
+        id_ : String
+        id_ =
+            maybeId
+                |> Maybe.map (showId >> (\str -> str ++ " "))
+                |> Maybe.withDefault ""
+
+        edgeStr : String
+        edgeStr =
+            case type_ of
+                Graph ->
+                    "--"
+
+                Digraph ->
+                    "->"
+
+        showRHS : Int -> EdgeRHS -> String
+        showRHS depth rhs =
+            String.join " "
+                [ edgeStr
+                , case rhs of
+                    EdgeNode nodeId_ ->
+                        showNodeId nodeId_
+
+                    EdgeSubgraph subgraph_ ->
+                        showSubgraph depth subgraph_
+                ]
+
+        showSubgraph : Int -> Subgraph -> String
+        showSubgraph depth (Subgraph maybeId_ stmts_) =
+            (filterEmpty >> String.join " ")
+                [ "subgraph"
+                , maybeId_
+                    |> Maybe.map showId
+                    |> Maybe.withDefault ""
+                , showStmts (depth + 1) stmts_
+                ]
+
+        showStmts : Int -> List Stmt -> String
+        showStmts depth stmts_ =
+            if List.isEmpty stmts_ then
+                "{}"
+
+            else
+                String.join (separator depth)
+                    ("{" :: List.map (showStmt depth) stmts_)
+                    ++ (separator (depth - 1) ++ "}")
+
+        showStmt : Int -> Stmt -> String
+        showStmt depth stmt =
+            case stmt of
+                NodeStmt nodeId_ attrs ->
+                    (filterEmpty >> String.join "")
+                        [ showNodeId nodeId_
+                        , showAttrs "" attrs
+                        ]
+
+                EdgeStmtNode nodeId_ rhs moreRhs attrs ->
+                    (filterEmpty >> String.join " ")
+                        [ showNodeId nodeId_
+                        , showRHS depth rhs
+                        , String.join "" (List.map (showRHS depth) moreRhs)
+                        ]
+                        ++ showAttrs "" attrs
+
+                EdgeStmtSubgraph subgraph_ rhs moreRhs attrs ->
+                    (filterEmpty >> String.join " ")
+                        [ showSubgraph depth subgraph_
+                        , showRHS depth rhs
+                        , String.join "" (List.map (showRHS depth) moreRhs)
+                        , showAttrs "" attrs
+                        ]
+
+                AttrStmt type__ attrs ->
+                    (filterEmpty >> String.join " ")
+                        [ showAttrStmtType type__, showAttrs "[]" attrs ]
+
+                LooseAttr attr_ ->
+                    showAttr attr_
+
+                SubgraphStmt subgraph_ ->
+                    showSubgraph depth subgraph_
+    in
+    showType type_ ++ " " ++ id_ ++ showStmts 1 stmts
+
+
+showId : ID -> String
+showId id_ =
+    case id_ of
+        ID str ->
+            let
+                escaped =
+                    String.replace "\\\"" "\\\"" str
+            in
+            if String.contains " " str || String.contains "\"" str then
+                "\"" ++ escaped ++ "\""
+
+            else
+                str
+
+        HtmlID node ->
+            nodeToString node
+
+        NumeralID float ->
+            String.fromFloat float
+
+
+showNodeId : NodeId -> String
+showNodeId (NodeId id_ maybePort) =
+    showId id_
+        ++ (maybePort
+                |> Maybe.map (showPort >> String.cons ':')
+                |> Maybe.withDefault ""
+           )
+
+
+showType : EdgeType -> String
+showType type_ =
+    case type_ of
+        Graph ->
+            "graph"
+
+        Digraph ->
+            "digraph"
+
+
+showAttrs : String -> List Attr -> String
+showAttrs default attrs =
+    if List.isEmpty attrs then
+        default
+
+    else
+        "[" ++ String.join "," (List.map showAttr attrs) ++ "]"
+
+
+showAttr : Attr -> String
+showAttr (Attr a b) =
+    String.join "=" [ showId a, showId b ]
+
+
+showAttrStmtType : AttrStmtType -> String
+showAttrStmtType type_ =
+    case type_ of
+        AttrGraph ->
+            "graph"
+
+        AttrNode ->
+            "node"
+
+        AttrEdge ->
+            "edge"
+
+
+showPort : Port -> String
+showPort port__ =
+    case port__ of
+        PortId id__ maybeCompassPt ->
+            showId id__
+                ++ (maybeCompassPt
+                        |> Maybe.map (showCompassPt >> String.cons ':')
+                        |> Maybe.withDefault ""
+                   )
+
+        PortPt compassPt_ ->
+            showCompassPt compassPt_
+
+
+showCompassPt : CompassPt -> String
+showCompassPt compassPt_ =
+    case compassPt_ of
+        N ->
+            "n"
+
+        NE ->
+            "ne"
+
+        E ->
+            "e"
+
+        SE ->
+            "se"
+
+        S ->
+            "s"
+
+        SW ->
+            "sw"
+
+        W ->
+            "w"
+
+        NW ->
+            "nw"
+
+        C ->
+            "c"
+
+        UND ->
+            "_"
