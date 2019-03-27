@@ -701,4 +701,19 @@ testToString =
                 Expect.equal
                     (Result.map toString (fromString g))
                     (Ok g)
+        , test "can flatten" <|
+            \_ ->
+                let
+                    g =
+                        String.join "\n"
+                            [ "digraph {"
+                            , "  a -> b"
+                            , "  b -> c"
+                            , "  c -> d"
+                            , "}"
+                            ]
+                in
+                Expect.equal
+                    (Result.map (toStringWithConfig OneLine) (fromString g))
+                    (Ok "digraph { a -> b b -> c c -> d }")
         ]

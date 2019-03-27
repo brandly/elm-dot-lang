@@ -2,8 +2,8 @@ module DotLang exposing
     ( fromString, Dot(..)
     , EdgeType(..), ID(..), Stmt(..)
     , NodeId(..), Attr(..), AttrStmtType(..), EdgeRHS(..), Subgraph(..)
+    , toString, Config(..), toStringWithConfig
     , dot
-    , toString
     )
 
 {-| Parse DOT Language in Elm.
@@ -20,6 +20,11 @@ Take a look at the grammar <https://www.graphviz.org/doc/info/lang.html>
 # Stmt Components
 
 @docs NodeId, Attr, AttrStmtType, EdgeRHS, EdgeType, Subgraph
+
+
+# toString
+
+@docs toString, Config, toStringWithConfig
 
 
 # Internal
@@ -499,12 +504,32 @@ filterEmpty =
     List.filter (String.length >> (<) 0)
 
 
+type Config
+    = OneLine
+    | Indent Int
+
+
 toString : Dot -> String
-toString (Dot type_ maybeId stmts) =
+toString =
+    toStringWithConfig (Indent 4)
+
+
+toStringWithConfig : Config -> Dot -> String
+toStringWithConfig config (Dot type_ maybeId stmts) =
     let
-        indent : String
-        indent =
-            "    "
+        separator : Int -> String
+        separator depth =
+            case config of
+                OneLine ->
+                    " "
+
+                Indent count ->
+                    let
+                        indent : String
+                        indent =
+                            String.repeat count " "
+                    in
+                    String.cons '\n' (String.repeat depth indent)
 
         id_ : String
         id_ =
@@ -545,11 +570,6 @@ toString (Dot type_ maybeId stmts) =
 
         showStmts : Int -> List Stmt -> String
         showStmts depth stmts_ =
-            let
-                separator : Int -> String
-                separator d =
-                    String.cons '\n' (String.repeat d indent)
-            in
             if List.isEmpty stmts_ then
                 "{}"
 
