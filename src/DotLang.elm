@@ -661,7 +661,7 @@ showId id_ =
         ID str ->
             let
                 escaped =
-                    String.replace "\\\"" "\\\"" str
+                    String.replace "\"" "\\\"" str
             in
             if String.contains " " str || String.contains "\"" str then
                 "\"" ++ escaped ++ "\""

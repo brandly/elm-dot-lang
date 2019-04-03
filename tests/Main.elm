@@ -733,4 +733,17 @@ testToString =
                 Expect.equal
                     (Result.map toString (fromString g))
                     (Ok g)
+        , test "can handle quotes in IDs" <|
+            \_ ->
+                let
+                    g =
+                        String.join "\n"
+                            [ "graph {"
+                            , "    \"\\\"wow\\\" - me\""
+                            , "}"
+                            ]
+                in
+                Expect.equal
+                    (Result.map toString (fromString g))
+                    (Ok g)
         ]
