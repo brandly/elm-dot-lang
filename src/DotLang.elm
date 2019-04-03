@@ -670,7 +670,7 @@ showId id_ =
                 str
 
         HtmlID node ->
-            nodeToString node
+            String.join "" [ "<", nodeToString node, ">" ]
 
         NumeralID float ->
             String.fromFloat float

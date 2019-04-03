@@ -720,4 +720,17 @@ testToString =
                 Expect.equal
                     (Result.map (toStringWithConfig OneLine) (fromString g))
                     (Ok "digraph { a -> b b -> c c -> d }")
+        , test "can handle HTML" <|
+            \_ ->
+                let
+                    g =
+                        String.join "\n"
+                            [ "digraph {"
+                            , "    a -> <<p>sup</p>>"
+                            , "}"
+                            ]
+                in
+                Expect.equal
+                    (Result.map toString (fromString g))
+                    (Ok g)
         ]
