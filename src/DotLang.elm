@@ -398,11 +398,32 @@ id =
                     , reserved = Set.fromList []
                     }
                 ]
-        , map NumeralID float
         , succeed HtmlID
             |. symbol "<"
             |= node
             |. symbol ">"
+        , negative
+            |> andThen
+                (\isNegative ->
+                    -- `float` doesn't handle negative numbers by default
+                    succeed
+                        (if isNegative then
+                            (*) -1
+
+                         else
+                            identity
+                        )
+                        |= float
+                )
+            |> map NumeralID
+        ]
+
+
+negative : Parser Bool
+negative =
+    oneOf
+        [ map (\_ -> True) (symbol "-")
+        , succeed False
         ]
 
 

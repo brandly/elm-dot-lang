@@ -640,6 +640,27 @@ testFromString =
                           }
                         ]
                     )
+        , test "parsing negative numbers" <|
+            \_ ->
+                Expect.equal
+                    (fromString
+                        (String.join "\n"
+                            [ "digraph {"
+                            , "    a -> -3"
+                            , "}"
+                            ]
+                        )
+                    )
+                    (Ok
+                        (Dot Digraph
+                            Nothing
+                            [ EdgeStmtNode (NodeId (ID "a") Nothing)
+                                (EdgeNode (NodeId (NumeralID -3) Nothing))
+                                []
+                                []
+                            ]
+                        )
+                    )
         ]
 
 
