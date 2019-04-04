@@ -578,10 +578,10 @@ toStringWithConfig : Config -> Dot -> String
 toStringWithConfig config (Dot type_ maybeId stmts) =
     let
         separator : Int -> String
-        separator depth =
+        separator =
             case config of
                 OneLine ->
-                    " "
+                    \_ -> " "
 
                 Indent count ->
                     let
@@ -589,7 +589,8 @@ toStringWithConfig config (Dot type_ maybeId stmts) =
                         indent =
                             String.repeat count " "
                     in
-                    String.cons '\n' (String.repeat depth indent)
+                    \depth ->
+                        String.cons '\n' (String.repeat depth indent)
 
         id_ : String
         id_ =
