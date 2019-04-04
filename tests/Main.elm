@@ -767,4 +767,17 @@ testToString =
                 Expect.equal
                     (Result.map toString (fromString g))
                     (Ok g)
+        , test "can handle hex codes" <|
+            \_ ->
+                let
+                    g =
+                        String.join "\n"
+                            [ "graph {"
+                            , "    color=\"#ffffff\""
+                            , "}"
+                            ]
+                in
+                Expect.equal
+                    (Result.map toString (fromString g))
+                    (Ok g)
         ]
