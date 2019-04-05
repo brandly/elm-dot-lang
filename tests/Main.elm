@@ -780,4 +780,30 @@ testToString =
                 Expect.equal
                     (Result.map toString (fromString g))
                     (Ok g)
+        , test "can handle JSON" <|
+            \_ ->
+                let
+                    g =
+                        String.join "\n"
+                            [ "graph {"
+                            , "    a -- \"{ \\\"key\\\": [ 123 ] }\""
+                            , "}"
+                            ]
+                in
+                Expect.equal
+                    (Result.map toString (fromString g))
+                    (Ok g)
+        , test "can handle empty ID strings" <|
+            \_ ->
+                let
+                    g =
+                        String.join "\n"
+                            [ "graph {"
+                            , "    a -- \"\""
+                            , "}"
+                            ]
+                in
+                Expect.equal
+                    (Result.map toString (fromString g))
+                    (Ok g)
         ]
