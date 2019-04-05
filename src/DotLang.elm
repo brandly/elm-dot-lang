@@ -36,7 +36,7 @@ Take a look at the grammar <https://www.graphviz.org/doc/info/lang.html>
 import DoubleQuoteString as DQS
 import Html.Parser exposing (Node(..), node, nodeToString)
 import Parser exposing (..)
-import Set
+import Set exposing (Set)
 
 
 {-| Parse a DOT string.
@@ -681,11 +681,11 @@ showId : ID -> String
 showId id_ =
     case id_ of
         ID str ->
-            let
-                escaped =
-                    String.replace "\"" "\\\"" str
-            in
-            if String.contains " " str || String.contains "\"" str then
+            if shouldBeQuoted str then
+                let
+                    escaped =
+                        String.replace "\"" "\\\"" str
+                in
                 "\"" ++ escaped ++ "\""
 
             else
@@ -696,6 +696,47 @@ showId id_ =
 
         NumeralID float ->
             String.fromFloat float
+
+
+shouldBeQuoted : String -> Bool
+shouldBeQuoted s =
+    String.isEmpty s || beginsWithADigit s || hasACharacterNotInWhiteList s
+
+
+isInWhiteList : Char -> Bool
+isInWhiteList char =
+    List.any identity
+        [ Char.isLower char
+        , Char.isUpper char
+        , '_' == char
+        , Char.isDigit char
+        , Set.member char asciiOctalFrom200To377
+        ]
+
+
+asciiOctalFrom200To377 : Set Char
+asciiOctalFrom200To377 =
+    -- DOT says: "Any string of alphabetic ([a-zA-Z\200-\377]) characters"
+    -- \200-\377 in octal is \128-\255 in decimal according to this table:
+    -- https://www.autoitscript.com/autoit3/docs/appendix/ascii.htm
+    List.range 128 255
+        |> List.map Char.fromCode
+        |> Set.fromList
+
+
+beginsWithADigit : String -> Bool
+beginsWithADigit string =
+    case String.uncons string of
+        Just ( c, _ ) ->
+            Char.isDigit c
+
+        Nothing ->
+            False
+
+
+hasACharacterNotInWhiteList : String -> Bool
+hasACharacterNotInWhiteList =
+    String.any (isInWhiteList >> not)
 
 
 showNodeId : NodeId -> String
