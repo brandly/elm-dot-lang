@@ -716,7 +716,10 @@ isInWhiteList char =
 
 asciiOctalFrom200To377 : Set Char
 asciiOctalFrom200To377 =
-    List.range 200 377
+    -- DOT says: "Any string of alphabetic ([a-zA-Z\200-\377]) characters"
+    -- \200-\377 in octal is \128-\255 in decimal according to this table:
+    -- https://www.autoitscript.com/autoit3/docs/appendix/ascii.htm
+    List.range 128 255
         |> List.map Char.fromCode
         |> Set.fromList
 
