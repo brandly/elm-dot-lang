@@ -224,15 +224,12 @@ edgeRHS type_ =
                     )
            )
         |. spacing
-        |> andThen
-            (\_ ->
-                oneOf
-                    [ succeed EdgeSubgraph
-                        |= subgraph type_
-                    , succeed EdgeNode
-                        |= nodeId
-                    ]
-            )
+        |= oneOf
+            [ succeed EdgeSubgraph
+                |= subgraph type_
+            , succeed EdgeNode
+                |= nodeId
+            ]
 
 
 edgeOp : Parser EdgeType
@@ -674,7 +671,7 @@ toStringWithConfig config (Dot type_ maybeId stmts) =
                 SubgraphStmt subgraph_ ->
                     showSubgraph depth subgraph_
     in
-    showType type_ ++ " " ++ id_ ++ showStmts 1 stmts
+    showEdgeType type_ ++ " " ++ id_ ++ showStmts 1 stmts
 
 
 showId : ID -> String
@@ -746,16 +743,6 @@ showNodeId (NodeId id_ maybePort) =
                 |> Maybe.map (showPort >> String.cons ':')
                 |> Maybe.withDefault ""
            )
-
-
-showType : EdgeType -> String
-showType type_ =
-    case type_ of
-        Graph ->
-            "graph"
-
-        Digraph ->
-            "digraph"
 
 
 showAttrs : String -> List Attr -> String
