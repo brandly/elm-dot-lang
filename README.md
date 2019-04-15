@@ -11,5 +11,11 @@ DotLang.fromString "graph { a -- b }"
 
 ```
 $ npm install
-$ npm test -- --watch
+$ npm test
+```
+
+the fuzz tests hang at times. to exclusively run unit tests on every save, do this:
+
+```
+$ npm test -- tests/Main.elm --watch
 ```
