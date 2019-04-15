@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test": "elm-test"
+    "test": "elm-test --fuzz 1"
   },
   "dependencies": {
     "elm": "0.19.0-bugfix6",
