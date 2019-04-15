@@ -443,7 +443,12 @@ port_ =
             , succeed PortId
                 |= id
                 |. spacing
-                |= maybeParse compassPt
+                |= maybeParse
+                    (succeed identity
+                        |. symbol ":"
+                        |. spacing
+                        |= compassPt
+                    )
             ]
 
 
@@ -466,14 +471,15 @@ type CompassPt
 compassPt : Parser CompassPt
 compassPt =
     symbolToType
-        [ ( "n", N )
-        , ( "ne", NE )
-        , ( "e", E )
-        , ( "se", SE )
-        , ( "s", S )
-        , ( "sw", SW )
-        , ( "w", W )
+        -- this order matters due to `symbol` being greedy
+        [ ( "ne", NE )
         , ( "nw", NW )
+        , ( "se", SE )
+        , ( "sw", SW )
+        , ( "n", N )
+        , ( "e", E )
+        , ( "s", S )
+        , ( "w", W )
         , ( "c", C )
         , ( "_", UND )
         ]

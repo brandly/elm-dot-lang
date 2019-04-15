@@ -661,6 +661,25 @@ testFromString =
                             ]
                         )
                     )
+        , test "parsing ports" <|
+            \_ ->
+                let
+                    g =
+                        "digraph { a:b:c }"
+                in
+                Expect.equal (fromString g)
+                    (Ok
+                        (Dot Digraph
+                            Nothing
+                            [ NodeStmt
+                                (NodeId
+                                    (ID "a")
+                                    (Just (PortId (ID "b") (Just C)))
+                                )
+                                []
+                            ]
+                        )
+                    )
         ]
 
 
@@ -806,4 +825,11 @@ testToString =
                 Expect.equal
                     (Result.map toString (fromString g))
                     (Ok g)
+        , test "can handle ports" <|
+            \_ ->
+                let
+                    g =
+                        Dot Digraph Nothing [ NodeStmt (NodeId (NumeralID 0.000001) (Just (PortId (NumeralID 0.000001) (Just C)))) [] ]
+                in
+                Expect.equal (toStringWithConfig OneLine g) "digraph { 0.000001:0.000001:c }"
         ]
