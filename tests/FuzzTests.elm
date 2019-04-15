@@ -19,7 +19,7 @@ suite =
 
 fuzzDot : Fuzzer Dot
 fuzzDot =
-    map3 Dot fuzzEdgeType (maybe fuzzId) fuzzStmts
+    map3 Dot fuzzEdgeType (maybe fuzzId) (fuzzStmts 1)
 
 
 fuzzEdgeType : Fuzzer EdgeType
@@ -32,23 +32,36 @@ fuzzEdgeType =
 
 fuzzId : Fuzzer ID
 fuzzId =
-    --TODO : ID, HtmlID
-    map NumeralID float
+    oneOf
+        [ map ID string
+        , map NumeralID float
+
+        -- TODO: HtmlID
+        ]
 
 
-fuzzStmts : Fuzzer (List Stmt)
-fuzzStmts =
+fuzzStmts : Int -> Fuzzer (List Stmt)
+fuzzStmts depth =
     list
         (oneOf
-            [ map2 NodeStmt fuzzNodeId (list fuzzAttr)
-
-            -- TODO
-            --    | EdgeStmtNode NodeId EdgeRHS (List EdgeRHS) (List Attr)
-            --    | EdgeStmtSubgraph Subgraph EdgeRHS (List EdgeRHS) (List Attr)
-            , map2 AttrStmt fuzzAttrStmtType (list fuzzAttr)
+            [ map2 NodeStmt
+                fuzzNodeId
+                (list fuzzAttr)
+            , map4 EdgeStmtNode
+                fuzzNodeId
+                (fuzzEdgeRHS depth)
+                (list (fuzzEdgeRHS depth))
+                (list fuzzAttr)
+            , map4 EdgeStmtSubgraph
+                (fuzzSubgraph depth)
+                (fuzzEdgeRHS depth)
+                (list (fuzzEdgeRHS depth))
+                (list fuzzAttr)
+            , map2 AttrStmt
+                fuzzAttrStmtType
+                (list fuzzAttr)
             , map LooseAttr fuzzAttr
-
-            --    | SubgraphStmt Subgraph
+            , map SubgraphStmt (fuzzSubgraph depth)
             ]
         )
 
@@ -94,3 +107,24 @@ fuzzAttrStmtType =
         , constant AttrNode
         , constant AttrEdge
         ]
+
+
+fuzzEdgeRHS : Int -> Fuzzer EdgeRHS
+fuzzEdgeRHS depth =
+    oneOf
+        [ map EdgeNode fuzzNodeId
+        , map EdgeSubgraph (fuzzSubgraph depth)
+        ]
+
+
+fuzzSubgraph : Int -> Fuzzer Subgraph
+fuzzSubgraph depth =
+    let
+        stm =
+            if depth <= 0 then
+                constant []
+
+            else
+                fuzzStmts (depth - 1)
+    in
+    map2 Subgraph (maybe fuzzId) stm
