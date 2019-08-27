@@ -4,7 +4,7 @@
     "test-ci": "npm test -- --seed 277939263651816"
   },
   "dependencies": {
-    "elm": "0.19.0-bugfix6",
+    "elm": "0.19.0-no-deps",
     "elm-test": "0.19.0-rev5"
   },
   "devDependencies": {
