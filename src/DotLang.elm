@@ -62,6 +62,8 @@ dot : Parser Dot
 dot =
     (succeed identity
         |. spacing
+        |. maybeParse (symbol "strict")
+        |. spacing
         |= edgeType
     )
         |> andThen

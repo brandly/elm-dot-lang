@@ -85,6 +85,21 @@ testFromString =
                             ]
                         )
                     )
+        , test "can be strict" <|
+            \_ ->
+                Expect.equal (fromString ("strict " ++  simpleGraph))
+                    (Ok
+                        (Dot Graph
+                            Nothing
+                            [ edge "a" "b"
+                            , edge "b" "c"
+                            , edge "a" "c"
+                            , edge "d" "c"
+                            , edge "e" "c"
+                            , edge "e" "a"
+                            ]
+                        )
+                    )
         , test "parsing simple digraph" <|
             \_ ->
                 Expect.equal
