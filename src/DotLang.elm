@@ -340,7 +340,7 @@ attrList =
 
 
 {-| A `Subgraph` defines a subset of vertices and edges within a graph. You
-might use this for to visually group a set of vertices together or just as a
+might use this to visually group a set of vertices together or just as a
 shorthand for defining edges between one vertex and a list of other vertices.
 -}
 type Subgraph
