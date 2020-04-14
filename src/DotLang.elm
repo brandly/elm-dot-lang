@@ -705,7 +705,7 @@ showId id_ =
 
 shouldBeQuoted : String -> Bool
 shouldBeQuoted s =
-    String.isEmpty s || beginsWithADigit s || hasACharacterNotInWhiteList s
+    String.isEmpty s || beginsWithADigit s || hasACharacterNotInWhiteList s || isKeyword s
 
 
 isInWhiteList : Char -> Bool
@@ -742,6 +742,12 @@ beginsWithADigit string =
 hasACharacterNotInWhiteList : String -> Bool
 hasACharacterNotInWhiteList =
     String.any (isInWhiteList >> not)
+
+
+isKeyword : String -> Bool
+isKeyword str =
+    List.member (String.toLower str)
+        [ "node", "edge", "graph", "digraph", "subgraph", "strict" ]
 
 
 showNodeId : NodeId -> String

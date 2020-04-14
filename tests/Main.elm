@@ -87,7 +87,7 @@ testFromString =
                     )
         , test "can be strict" <|
             \_ ->
-                Expect.equal (fromString ("strict " ++  simpleGraph))
+                Expect.equal (fromString ("strict " ++ simpleGraph))
                     (Ok
                         (Dot Graph
                             Nothing
@@ -847,4 +847,11 @@ testToString =
                         Dot Digraph Nothing [ NodeStmt (NodeId (NumeralID 0.000001) (Just (PortId (NumeralID 0.000001) (Just C)))) [] ]
                 in
                 Expect.equal (toStringWithConfig OneLine g) "digraph { 0.000001:0.000001:c }"
+        , test "wraps keywords in quotes" <|
+            \_ ->
+                let
+                    g =
+                        Dot Digraph Nothing [ EdgeStmtNode (NodeId (ID "Graph") Nothing) (EdgeNode (NodeId (ID "Subgraph") Nothing)) [] [] ]
+                in
+                Expect.equal (toStringWithConfig OneLine g) "digraph { \"Graph\" -> \"Subgraph\" }"
         ]
