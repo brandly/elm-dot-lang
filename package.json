@@ -1,7 +1,6 @@
 {
   "scripts": {
-    "test": "elm-test --fuzz 1",
-    "test-ci": "npm test -- --seed 277939263651816"
+    "test": "elm-test"
   },
   "dependencies": {
     "elm": "0.19.1-3",
