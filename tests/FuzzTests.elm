@@ -42,28 +42,33 @@ fuzzId =
 
 fuzzStmts : Int -> Fuzzer (List Stmt)
 fuzzStmts depth =
-    list
+    shortList
         (oneOf
             [ map2 NodeStmt
                 fuzzNodeId
-                (list fuzzAttr)
+                (shortList fuzzAttr)
             , map4 EdgeStmtNode
                 fuzzNodeId
                 (fuzzEdgeRHS depth)
-                (list (fuzzEdgeRHS depth))
-                (list fuzzAttr)
+                (shortList (fuzzEdgeRHS depth))
+                (shortList fuzzAttr)
             , map4 EdgeStmtSubgraph
                 (fuzzSubgraph depth)
                 (fuzzEdgeRHS depth)
-                (list (fuzzEdgeRHS depth))
-                (list fuzzAttr)
+                (shortList (fuzzEdgeRHS depth))
+                (shortList fuzzAttr)
             , map2 AttrStmt
                 fuzzAttrStmtType
-                (list fuzzAttr)
+                (shortList fuzzAttr)
             , map LooseAttr fuzzAttr
             , map SubgraphStmt (fuzzSubgraph depth)
             ]
         )
+
+
+shortList : Fuzzer a -> Fuzzer (List a)
+shortList fuzzer =
+    map3 (\a b c -> [ a, b, c ]) fuzzer fuzzer fuzzer
 
 
 fuzzNodeId : Fuzzer NodeId
