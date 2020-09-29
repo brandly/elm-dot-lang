@@ -14,7 +14,7 @@ $ npm install
 $ npm test
 ```
 
-the fuzz tests hang at times. to exclusively run unit tests on every save, do this:
+the fuzz tests might take a moment. to exclusively run unit tests on every save, do this:
 
 ```
 $ npm test -- tests/Main.elm --watch
