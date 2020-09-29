@@ -46,20 +46,20 @@ fuzzStmts depth =
         (oneOf
             [ map2 NodeStmt
                 fuzzNodeId
-                (shortList fuzzAttr)
+                (list fuzzAttr)
             , map4 EdgeStmtNode
                 fuzzNodeId
                 (fuzzEdgeRHS depth)
                 (shortList (fuzzEdgeRHS depth))
-                (shortList fuzzAttr)
+                (list fuzzAttr)
             , map4 EdgeStmtSubgraph
                 (fuzzSubgraph depth)
                 (fuzzEdgeRHS depth)
                 (shortList (fuzzEdgeRHS depth))
-                (shortList fuzzAttr)
+                (list fuzzAttr)
             , map2 AttrStmt
                 fuzzAttrStmtType
-                (shortList fuzzAttr)
+                (list fuzzAttr)
             , map LooseAttr fuzzAttr
             , map SubgraphStmt (fuzzSubgraph depth)
             ]
