@@ -689,7 +689,9 @@ showId id_ =
             if shouldBeQuoted str then
                 let
                     escaped =
-                        String.replace "\"" "\\\"" str
+                        str
+                            |> String.replace "\\" "\\\\"
+                            |> String.replace "\"" "\\\""
                 in
                 "\"" ++ escaped ++ "\""
 
