@@ -385,17 +385,22 @@ type ID
     | NumeralID Float
 
 
+unquotedVariable : Parser String
+unquotedVariable =
+    variable
+        { start = \c -> Char.isAlpha c || c == '_'
+        , inner = \c -> Char.isAlphaNum c || c == '_'
+        , reserved = Set.fromList []
+        }
+
+
 id : Parser ID
 id =
     oneOf
         [ map ID <|
             oneOf
                 [ DQS.string
-                , variable
-                    { start = \c -> Char.isAlpha c || c == '_'
-                    , inner = \c -> Char.isAlphaNum c || c == '_'
-                    , reserved = Set.fromList []
-                    }
+                , unquotedVariable
                 ]
         , succeed HtmlID
             |. symbol "<"
@@ -440,18 +445,52 @@ port_ =
         |. symbol ":"
         |. spacing
         |= oneOf
-            [ succeed PortPt
-                |= compassPt
+            [ unquotedVariable
+                |> andThen
+                    (\var ->
+                        {- If a token is like `c0` and we directly parse a
+                           `compassPt`, the parser will be greedy and claim the
+                           `c` leaving the 0 behind.
+                        -}
+                        if isCompassPt var then
+                            succeed
+                                (PortPt
+                                    (compassPtMapping
+                                        |> List.filterMap
+                                            (\( v, compass ) ->
+                                                if v == var then
+                                                    Just compass
+
+                                                else
+                                                    Nothing
+                                            )
+                                        |> List.head
+                                        -- Already check that it `isCompassPt`,
+                                        -- so this won't get hit.
+                                        |> Maybe.withDefault UND
+                                    )
+                                )
+
+                        else
+                            succeed (PortId (ID var))
+                                |. spacing
+                                |= portIdSuffix
+                    )
             , succeed PortId
                 |= id
                 |. spacing
-                |= maybeParse
-                    (succeed identity
-                        |. symbol ":"
-                        |. spacing
-                        |= compassPt
-                    )
+                |= portIdSuffix
             ]
+
+
+portIdSuffix : Parser (Maybe CompassPt)
+portIdSuffix =
+    maybeParse
+        (succeed identity
+            |. symbol ":"
+            |. spacing
+            |= compassPt
+        )
 
 
 {-| A `CompassPt` describes the 8 compass directions, as well as `C` for
@@ -472,19 +511,23 @@ type CompassPt
 
 compassPt : Parser CompassPt
 compassPt =
-    symbolToType
-        -- this order matters due to `symbol` being greedy
-        [ ( "ne", NE )
-        , ( "nw", NW )
-        , ( "se", SE )
-        , ( "sw", SW )
-        , ( "n", N )
-        , ( "e", E )
-        , ( "s", S )
-        , ( "w", W )
-        , ( "c", C )
-        , ( "_", UND )
-        ]
+    symbolToType compassPtMapping
+
+
+compassPtMapping : List ( String, CompassPt )
+compassPtMapping =
+    -- this order matters due to `symbol` being greedy
+    [ ( "ne", NE )
+    , ( "nw", NW )
+    , ( "se", SE )
+    , ( "sw", SW )
+    , ( "n", N )
+    , ( "e", E )
+    , ( "s", S )
+    , ( "w", W )
+    , ( "c", C )
+    , ( "_", UND )
+    ]
 
 
 comment : Parser ()
@@ -683,13 +726,20 @@ toStringWithConfig config (Dot type_ maybeId stmts) =
 
 
 showId : ID -> String
-showId id_ =
+showId =
+    showIdWithQuotes shouldBeQuotedDefault
+
+
+showIdWithQuotes : (String -> Bool) -> ID -> String
+showIdWithQuotes shouldBeQuoted id_ =
     case id_ of
         ID str ->
             if shouldBeQuoted str then
                 let
                     escaped =
-                        String.replace "\"" "\\\"" str
+                        str
+                            |> String.replace "\\" "\\\\"
+                            |> String.replace "\"" "\\\""
                 in
                 "\"" ++ escaped ++ "\""
 
@@ -703,13 +753,13 @@ showId id_ =
             String.fromFloat float
 
 
-shouldBeQuoted : String -> Bool
-shouldBeQuoted s =
+shouldBeQuotedDefault : String -> Bool
+shouldBeQuotedDefault s =
     String.isEmpty s || beginsWithADigit s || hasACharacterNotInWhiteList s || isKeyword s
 
 
-isInWhiteList : Char -> Bool
-isInWhiteList char =
+isInAllowList : Char -> Bool
+isInAllowList char =
     List.any identity
         [ Char.isLower char
         , Char.isUpper char
@@ -741,7 +791,7 @@ beginsWithADigit string =
 
 hasACharacterNotInWhiteList : String -> Bool
 hasACharacterNotInWhiteList =
-    String.any (isInWhiteList >> not)
+    String.any (isInAllowList >> not)
 
 
 isKeyword : String -> Bool
@@ -790,7 +840,12 @@ showPort : Port -> String
 showPort port__ =
     case port__ of
         PortId id__ maybeCompassPt ->
-            showId id__
+            let
+                shouldBeQuoted : String -> Bool
+                shouldBeQuoted str =
+                    shouldBeQuotedDefault str || isCompassPt str
+            in
+            showIdWithQuotes shouldBeQuoted id__
                 ++ (maybeCompassPt
                         |> Maybe.map (showCompassPt >> String.cons ':')
                         |> Maybe.withDefault ""
@@ -832,3 +887,13 @@ showCompassPt compassPt_ =
 
         UND ->
             "_"
+
+
+compassPts : Set String
+compassPts =
+    Set.fromList (List.map Tuple.first compassPtMapping)
+
+
+isCompassPt : String -> Bool
+isCompassPt str =
+    Set.member (String.toLower str) compassPts
