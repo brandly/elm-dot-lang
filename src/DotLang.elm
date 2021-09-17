@@ -543,7 +543,7 @@ spacing : Parser ()
 spacing =
     let
         isSpace =
-            \c -> c == ' ' || c == '\n' || c == '\u{000D}'
+            \c -> c == ' ' || c == '\n' || c == '\u{000D}' || c == '\t'
     in
     succeed ()
         |. (repeat <|
