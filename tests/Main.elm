@@ -55,6 +55,21 @@ testFromString =
                             ]
                         )
                     )
+        , test "parsing simple graph with tabs" <|
+            \_ ->
+                Expect.equal (fromString (String.replace "    " "\t" simpleGraph))
+                    (Ok
+                        (Dot Graph
+                            Nothing
+                            [ edge "a" "b"
+                            , edge "b" "c"
+                            , edge "a" "c"
+                            , edge "d" "c"
+                            , edge "e" "c"
+                            , edge "e" "a"
+                            ]
+                        )
+                    )
         , test "don't need semicolons" <|
             \_ ->
                 Expect.equal (fromString (String.filter ((/=) ';') simpleGraph))
