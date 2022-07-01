@@ -23,6 +23,7 @@ stringHelp revChunks =
             |= oneOf
                 [ map (\_ -> "\n") (token "n")
                 , map (\_ -> "\t") (token "t")
+                , map (\_ -> "\\l") (token "l")
                 , map (\_ -> "\u{000D}") (token "r")
                 , map (\_ -> "\"") (token "\"")
                 , map (\_ -> "\\") (token "\\")

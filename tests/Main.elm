@@ -172,7 +172,10 @@ testFromString =
                     (Ok
                         (Dot Digraph
                             (Just (ID "hello"))
-                            [ edge "a" "b"
+                            [ NodeStmt (NodeId (ID "a") Nothing)
+                                [ Attr (ID "label") (ID "{A|attr_name : NoneType\\lname : NoneType\\l}")
+                                ]
+                            , edge "a" "b"
                             ]
                         )
                     )
