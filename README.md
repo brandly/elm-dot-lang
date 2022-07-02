@@ -19,3 +19,5 @@ the fuzz tests might take a moment. to exclusively run unit tests on every save,
 ```
 $ npm test -- tests/Main.elm --watch
 ```
+
+![dependencies](https://github.com/brandly/elm-dot-lang/blob/master/dependency-graph.svg)
