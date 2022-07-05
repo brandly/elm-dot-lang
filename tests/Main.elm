@@ -179,6 +179,72 @@ testFromString =
                             ]
                         )
                     )
+        , test "graph with \\g" <|
+            \_ ->
+                Expect.equal
+                    (fromString
+                        (String.join "\n"
+                            [ "digraph hello {"
+                            , "    a [label=\"{A|attr_name : NoneType\\gname : NoneType\\g}\"];"
+                            , "    a -> b;"
+                            , "}"
+                            ]
+                        )
+                    )
+                    (Ok
+                        (Dot Digraph
+                            (Just (ID "hello"))
+                            [ NodeStmt (NodeId (ID "a") Nothing)
+                                [ Attr (ID "label") (ID "{A|attr_name : NoneType\\gname : NoneType\\g}")
+                                ]
+                            , edge "a" "b"
+                            ]
+                        )
+                    )
+        , test "graph with \\e" <|
+            \_ ->
+                Expect.equal
+                    (fromString
+                        (String.join "\n"
+                            [ "digraph hello {"
+                            , "    a [label=\"{A|attr_name : NoneType\\ename : NoneType\\e}\"];"
+                            , "    a -> b;"
+                            , "}"
+                            ]
+                        )
+                    )
+                    (Ok
+                        (Dot Digraph
+                            (Just (ID "hello"))
+                            [ NodeStmt (NodeId (ID "a") Nothing)
+                                [ Attr (ID "label") (ID "{A|attr_name : NoneType\\ename : NoneType\\e}")
+                                ]
+                            , edge "a" "b"
+                            ]
+                        )
+                    )
+        , test "graph with \\h" <|
+            \_ ->
+                Expect.equal
+                    (fromString
+                        (String.join "\n"
+                            [ "digraph hello {"
+                            , "    a [label=\"{A|attr_name : NoneType\\hname : NoneType\\h}\"];"
+                            , "    a -> b;"
+                            , "}"
+                            ]
+                        )
+                    )
+                    (Ok
+                        (Dot Digraph
+                            (Just (ID "hello"))
+                            [ NodeStmt (NodeId (ID "a") Nothing)
+                                [ Attr (ID "label") (ID "{A|attr_name : NoneType\\hname : NoneType\\h}")
+                                ]
+                            , edge "a" "b"
+                            ]
+                        )
+                    )
         , test "parsing full digraph" <|
             \_ ->
                 Expect.equal
