@@ -1,19 +1,8 @@
 module DotLang exposing
-    ( fromString
-    , Dot(..)
-    , EdgeType(..)
-    , ID(..)
-    , Stmt(..)
-    , NodeId(..)
-    , Attr(..)
-    , AttrStmtType(..)
-    , EdgeRHS(..)
-    , Subgraph(..)
-    , Port(..)
-    , CompassPt(..)
-    , toString
-    , Config(..)
-    , toStringWithConfig
+    ( fromString, Dot(..)
+    , EdgeType(..), ID(..), Stmt(..)
+    , NodeId(..), Attr(..), AttrStmtType(..), EdgeRHS(..), Subgraph(..), Port(..), CompassPt(..)
+    , toString, Config(..), toStringWithConfig
     , dot
     )
 
