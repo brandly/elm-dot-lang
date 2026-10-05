@@ -388,8 +388,8 @@ type ID
 unquotedVariable : Parser String
 unquotedVariable =
     variable
-        { start = \c -> Char.isAlpha c || c == '_'
-        , inner = \c -> Char.isAlphaNum c || c == '_'
+        { start = \c -> Char.isAlpha c || c == '_' || Set.member c asciiOctalFrom200To377
+        , inner = \c -> Char.isAlphaNum c || c == '_' || Set.member c asciiOctalFrom200To377
         , reserved = Set.fromList []
         }
 

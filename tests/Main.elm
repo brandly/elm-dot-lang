@@ -877,6 +877,19 @@ testToString =
                 Expect.equal
                     (Result.map toString (fromString g))
                     (Ok g)
+        , test "can handle unquoted IDs with characters in \\200-\\377" <|
+            \_ ->
+                let
+                    g =
+                        String.join "\n"
+                            [ "graph {"
+                            , "    café -- \u{0080}"
+                            , "}"
+                            ]
+                in
+                Expect.equal
+                    (Result.map toString (fromString g))
+                    (Ok g)
         , test "can handle ports" <|
             \_ ->
                 let
