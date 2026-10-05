@@ -1,4 +1,4 @@
-# dot-lang [![Build Status](https://travis-ci.org/brandly/elm-dot-lang.svg?branch=master)](https://travis-ci.org/brandly/elm-dot-lang)
+# dot-lang [![Test](https://github.com/brandly/elm-dot-lang/actions/workflows/test.yml/badge.svg)](https://github.com/brandly/elm-dot-lang/actions/workflows/test.yml)
 
 ```elm
 import DotLang
