@@ -34,10 +34,18 @@ fuzzId : Fuzzer ID
 fuzzId =
     oneOf
         [ map ID string
-        , map NumeralID float
+        , map NumeralID fuzzNumeral
 
         -- TODO: HtmlID
         ]
+
+
+fuzzNumeral : Fuzzer Float
+fuzzNumeral =
+    -- elm/parser's `float` loses precision on integers beyond 2^53, so those
+    -- don't survive a round trip.
+    niceFloat
+        |> filter (\f -> abs f <= 2 ^ 53)
 
 
 fuzzStmts : Int -> Fuzzer (List Stmt)
