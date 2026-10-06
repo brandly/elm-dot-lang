@@ -410,10 +410,14 @@ id =
         ]
 
 
-{-| Chomps a numeral, `[-]?(.[0-9]+ | [0-9]+(.[0-9]*)?)`, plus an optional
-exponent since `String.fromFloat` can produce those (e.g. `1e+300`). The text is
-converted with `String.toFloat`, because `Parser.float` loses precision on
-integers beyond 2^53.
+{-| Chomps a numeral, `[-]?(.[0-9]+ | [0-9]+(.[0-9]*)?)`, and converts it with
+`String.toFloat`, because `Parser.float` loses precision on integers beyond 2^53.
+
+This is intentionally more lenient than DOT: it also accepts an exponent (e.g.
+`1e+300`), which DOT doesn't allow. Older versions of `toString` produced
+exponents, and `Parser.float` accepted them, so we keep parsing them. We never
+produce them, though. See `showNumeral`.
+
 -}
 numeral : Parser Float
 numeral =
@@ -777,7 +781,72 @@ showIdWithQuotes shouldBeQuoted id_ =
             String.join "" [ "<", nodeToString node, ">" ]
 
         NumeralID float ->
+            if isNaN float || isInfinite float then
+                -- DOT has no numeral for these, so fall back to a string ID
+                showIdWithQuotes shouldBeQuoted (ID (String.fromFloat float))
+
+            else
+                showNumeral float
+
+
+{-| DOT numerals don't allow exponents, but `String.fromFloat` switches to them
+for very large and very small values (e.g. `1e+21`, `1e-7`), so expand those
+into plain decimal notation. `String.toFloat` reads the expanded form back as
+the exact same value.
+-}
+showNumeral : Float -> String
+showNumeral float =
+    let
+        str =
             String.fromFloat float
+    in
+    case String.split "e" str of
+        [ mantissa, exponent ] ->
+            case String.toInt (String.replace "+" "" exponent) of
+                Just exp ->
+                    expandExponent mantissa exp
+
+                Nothing ->
+                    str
+
+        _ ->
+            str
+
+
+expandExponent : String -> Int -> String
+expandExponent mantissa exponent =
+    let
+        ( sign, unsigned ) =
+            if String.startsWith "-" mantissa then
+                ( "-", String.dropLeft 1 mantissa )
+
+            else
+                ( "", mantissa )
+
+        ( intPart, fracPart ) =
+            case String.split "." unsigned of
+                [ i, f ] ->
+                    ( i, f )
+
+                _ ->
+                    ( unsigned, "" )
+
+        digits =
+            intPart ++ fracPart
+
+        point =
+            String.length intPart + exponent
+    in
+    sign
+        ++ (if point <= 0 then
+                "0." ++ String.repeat (negate point) "0" ++ digits
+
+            else if point >= String.length digits then
+                digits ++ String.repeat (point - String.length digits) "0"
+
+            else
+                String.left point digits ++ "." ++ String.dropLeft point digits
+           )
 
 
 shouldBeQuotedDefault : String -> Bool

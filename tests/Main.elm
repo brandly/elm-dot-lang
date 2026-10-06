@@ -717,7 +717,7 @@ testFromString =
             \_ ->
                 Expect.equal (fromString "graph { 18014398509482236 }")
                     (Ok (Dot Graph Nothing [ NodeStmt (NodeId (NumeralID 18014398509482236) Nothing) [] ]))
-        , test "parsing numerals with exponents" <|
+        , test "parsing numerals with exponents, even though DOT doesn't allow them" <|
             \_ ->
                 Expect.equal (fromString "graph { 1e+300 -- -1e-7 }")
                     (Ok
@@ -914,6 +914,32 @@ testToString =
                         Dot Digraph Nothing [ NodeStmt (NodeId (NumeralID 0.000001) (Just (PortId (NumeralID 0.000001) (Just C)))) [] ]
                 in
                 Expect.equal (toStringWithConfig OneLine g) "digraph { 0.000001:0.000001:c }"
+        , test "writes large and small numerals without exponents" <|
+            \_ ->
+                let
+                    g =
+                        Dot Graph
+                            Nothing
+                            [ EdgeStmtNode (NodeId (NumeralID 1.2344999999999999e21) Nothing)
+                                (EdgeNode (NodeId (NumeralID -1.5e-7) Nothing))
+                                []
+                                []
+                            ]
+                in
+                Expect.equal (toStringWithConfig OneLine g) "graph { 1234500000000000000000 -- -0.00000015 }"
+        , test "writes non-finite numerals as string IDs" <|
+            \_ ->
+                let
+                    g =
+                        Dot Graph
+                            Nothing
+                            [ EdgeStmtNode (NodeId (NumeralID (-1 / 0)) Nothing)
+                                (EdgeNode (NodeId (NumeralID (0 / 0)) Nothing))
+                                []
+                                []
+                            ]
+                in
+                Expect.equal (toStringWithConfig OneLine g) "graph { \"-Infinity\" -- NaN }"
         , test "wraps keywords in quotes" <|
             \_ ->
                 let
