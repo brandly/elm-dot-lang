@@ -713,6 +713,23 @@ testFromString =
                             ]
                         )
                     )
+        , test "parsing large integer numerals" <|
+            \_ ->
+                Expect.equal (fromString "graph { 18014398509482236 }")
+                    (Ok (Dot Graph Nothing [ NodeStmt (NodeId (NumeralID 18014398509482236) Nothing) [] ]))
+        , test "parsing numerals with exponents" <|
+            \_ ->
+                Expect.equal (fromString "graph { 1e+300 -- -1e-7 }")
+                    (Ok
+                        (Dot Graph
+                            Nothing
+                            [ EdgeStmtNode (NodeId (NumeralID 1.0e300) Nothing)
+                                (EdgeNode (NodeId (NumeralID -1.0e-7) Nothing))
+                                []
+                                []
+                            ]
+                        )
+                    )
         , test "parsing ports" <|
             \_ ->
                 let

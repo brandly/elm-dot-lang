@@ -406,29 +406,56 @@ id =
             |. symbol "<"
             |= node
             |. symbol ">"
-        , negative
-            |> andThen
-                (\isNegative ->
-                    -- `float` doesn't handle negative numbers by default
-                    succeed
-                        (if isNegative then
-                            (*) -1
+        , map NumeralID numeral
+        ]
 
-                         else
-                            identity
+
+{-| Chomps a numeral, `[-]?(.[0-9]+ | [0-9]+(.[0-9]*)?)`, plus an optional
+exponent since `String.fromFloat` can produce those (e.g. `1e+300`). The text is
+converted with `String.toFloat`, because `Parser.float` loses precision on
+integers beyond 2^53.
+-}
+numeral : Parser Float
+numeral =
+    getChompedString
+        (succeed ()
+            |. optional (chompIf ((==) '-'))
+            |. oneOf
+                [ succeed ()
+                    |. chompIf ((==) '.')
+                    |. chompIf Char.isDigit
+                    |. chompWhile Char.isDigit
+                , succeed ()
+                    |. chompIf Char.isDigit
+                    |. chompWhile Char.isDigit
+                    |. optional
+                        (chompIf ((==) '.')
+                            |. chompWhile Char.isDigit
                         )
-                        |= float
+                ]
+            |. optional
+                (backtrackable
+                    (chompIf (\c -> c == 'e' || c == 'E')
+                        |. optional (chompIf (\c -> c == '+' || c == '-'))
+                        |. chompIf Char.isDigit
+                    )
+                    |. chompWhile Char.isDigit
                 )
-            |> map NumeralID
-        ]
+        )
+        |> andThen
+            (\str ->
+                case String.toFloat str of
+                    Just float ->
+                        succeed float
+
+                    Nothing ->
+                        problem ("Invalid numeral: " ++ str)
+            )
 
 
-negative : Parser Bool
-negative =
-    oneOf
-        [ map (\_ -> True) (symbol "-")
-        , succeed False
-        ]
+optional : Parser () -> Parser ()
+optional parser =
+    oneOf [ parser, succeed () ]
 
 
 {-| A `Port` is a point where edges can attach to a vertex. The `Port` can have
