@@ -14,6 +14,13 @@ suite =
         [ fuzz fuzzDot "can parse toString output" <|
             \theDot ->
                 Expect.equal (Ok theDot) (fromString (toString theDot))
+        , fuzz niceFloat "writes numerals using only DOT numeral characters" <|
+            \f ->
+                toStringWithConfig OneLine (Dot Graph Nothing [ NodeStmt (NodeId (NumeralID f) Nothing) [] ])
+                    |> String.dropLeft (String.length "graph { ")
+                    |> String.dropRight (String.length " }")
+                    |> String.all (\c -> Char.isDigit c || c == '-' || c == '.')
+                    |> Expect.equal True
         ]
 
 
